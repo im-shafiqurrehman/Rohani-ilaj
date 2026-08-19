@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #ffffff;
+}
+
+::selection {
+  background-color: #e6bd60;
+  color: #051740;
+}
+
+/* Subtle repeating 8-point Islamic star lattice. On the white theme it sits at
+   a much lower opacity than it did on navy, so it reads as paper texture
+   rather than a visible grid. */
+.pattern-lattice {
+  background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(212, 162, 47, 0.28) 1px,
+      transparent 0
+    ),
+    linear-gradient(135deg, rgba(5, 23, 64, 0.04) 1px, transparent 1px),
+    linear-gradient(45deg, rgba(5, 23, 64, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px, 28px 28px, 28px 28px;
+}
+
+/* Headings pick up the logo's gold gradient. Weighted toward the deep end so
+   the text stays legible against white. */
+.text-gold-gradient {
+  background: linear-gradient(180deg, #e6bd60 0%, #d4a22f 55%, #8a6413 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Respect reduced-motion users */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
