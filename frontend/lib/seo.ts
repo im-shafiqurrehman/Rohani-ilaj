@@ -16,7 +16,7 @@ export const ROUTES = [
 
 export const SERVICES = [
   {
-    name: "Initial Call",
+    name: "Initial Consultation",
     nameUrdu: "ابتدائی کال",
     price: 2000,
     minutes: 30,
@@ -24,7 +24,7 @@ export const SERVICES = [
       "An opening consultation by phone call to understand the matter and give guidance within Shariah.",
   },
   {
-    name: "Physical Session",
+    name: "In-Person Session",
     nameUrdu: "فزیکل سیشن",
     price: 5000,
     minutes: 30,

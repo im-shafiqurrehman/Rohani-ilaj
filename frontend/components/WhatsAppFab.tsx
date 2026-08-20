@@ -18,7 +18,7 @@ export default function WhatsAppFab() {
       target={isWhatsApp ? "_blank" : undefined}
       rel={isWhatsApp ? "noreferrer noopener" : undefined}
       aria-label={isWhatsApp ? t.whatsappAria : t.fab}
-      className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2.5 rounded-full border border-line bg-surface/90 px-5 py-3 font-body text-xs tracking-wide text-fg shadow-lift backdrop-blur-xl transition-all duration-500 ease-editorial hover:border-accent/60 hover:text-accent focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+      className="btn-outline fixed bottom-6 right-6 z-40 inline-flex items-center gap-2.5 rounded-full bg-surface/90 px-5 py-3 font-body text-xs tracking-wide shadow-lift backdrop-blur-xl focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
     >
       {isWhatsApp ? (
         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" className="text-accent">

@@ -30,8 +30,13 @@ const bookingSchema = new mongoose.Schema(
       trim: true,
     },
     customerEmail: {
+      // Required for self-serve bookings, since that is the only channel the
+      // confirmation travels on. Optional when an admin books on someone's
+      // behalf, because those customers are reached on WhatsApp instead.
       type: String,
-      required: true,
+      required: function () {
+        return !this.createdByAdmin;
+      },
       trim: true,
       lowercase: true,
     },
@@ -70,16 +75,24 @@ const bookingSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    /** Entered by the practitioner rather than booked by the customer. */
+    createdByAdmin: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
     transactionId: {
       type: String,
       trim: true,
       uppercase: true,
     },
     screenshotUrl: {
-      // Cloudinary URL of the single confirmation screenshot — now the only
-      // evidence of payment, so it is the one genuinely required field.
+      // The customer's proof of payment. Not required for an admin-entered
+      // booking: the practitioner has already seen the receipt on WhatsApp.
       type: String,
-      required: true,
+      required: function () {
+        return !this.createdByAdmin;
+      },
     },
     // Cloudinary's MD5 of the uploaded file, when the storage driver reports
     screenshotEtag: {

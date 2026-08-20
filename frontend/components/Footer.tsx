@@ -3,18 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import SocialIcons from "./SocialIcons";
-import { NAV, SITE } from "@/lib/site";
+import { NAV, POLICY_NAV, SITE, WHATSAPP_LINK } from "@/lib/site";
 import { useLang } from "./LanguageProvider";
 
 export default function Footer() {
   const { t } = useLang();
 
   return (
-    <footer dir="ltr" className="border-t border-line bg-ink px-6 py-16">
+    <footer className="border-t border-line bg-ink px-6 py-16">
       <div className="mx-auto max-w-6xl">
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-3">
+            <div dir="ltr" className="flex items-center gap-3">
               <Image
                 src="/asset/logo-mark.png"
                 alt=""
@@ -22,13 +22,8 @@ export default function Footer() {
                 height={541}
                 className="h-10 w-auto"
               />
-              <span className="flex flex-col leading-none">
-                <span className="font-display text-lg font-medium tracking-wide text-fg">
-                  Rohani Ilaj
-                </span>
-                <span className="mt-1 font-body text-[9px] tracking-[0.28em] text-muted">
-                  CENTER
-                </span>
+              <span className="font-display text-lg font-medium tracking-wide text-fg">
+                Rohani Ilaj Center
               </span>
             </div>
             <p className="mt-6 max-w-sm font-body text-sm leading-7 text-muted">
@@ -39,7 +34,7 @@ export default function Footer() {
 
           <nav>
             <h3 className="font-body text-[11px] tracking-[0.22em] text-fg">
-              EXPLORE
+              {t.footer.explore}
             </h3>
             <ul className="mt-5 space-y-3">
               {NAV.map((l) => (
@@ -63,11 +58,44 @@ export default function Footer() {
             </ul>
           </nav>
 
+          <nav>
+            <h3 className="font-body text-[11px] tracking-[0.22em] text-fg">
+              {t.footer.policies}
+            </h3>
+            <ul className="mt-5 space-y-3">
+              {POLICY_NAV.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    className="font-body text-sm text-muted transition-colors duration-300 hover:text-accent"
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
           <div>
             <h3 className="font-body text-[11px] tracking-[0.22em] text-fg">
-              CONTACT
+              {t.footer.contactHeading}
             </h3>
             <ul className="mt-5 space-y-4 font-body text-sm text-muted">
+              {WHATSAPP_LINK && (
+                <li>
+                  <a
+                    href={WHATSAPP_LINK}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="transition-colors duration-300 hover:text-accent"
+                  >
+                    {SITE.whatsapp}
+                  </a>
+                  <span className="mt-0.5 block text-[11px] text-muted/60">
+                    WhatsApp
+                  </span>
+                </li>
+              )}
               {SITE.email && (
                 <li>
                   <a
@@ -83,12 +111,16 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-line pt-8 sm:flex-row">
+        <p className="mt-16 rounded-lg border border-line bg-surface/60 px-5 py-4 font-body text-xs leading-6 text-muted/80">
+          <strong className="text-fg">{t.footer.disclaimerLead}</strong> {t.footer.disclaimer}
+        </p>
+
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-line pt-8 sm:flex-row">
           <p className="font-body text-xs text-muted/70">
             © {new Date().getFullYear()} {SITE.name}. All rights reserved.
           </p>
           <p className="font-body text-xs text-muted/70">
-            Guidance offered strictly within the bounds of Shariah.
+            {t.footer.noPromises}
           </p>
         </div>
       </div>

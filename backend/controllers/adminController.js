@@ -4,6 +4,8 @@ const User = require("../models/User");
 const Booking = require("../models/Booking");
 const { normalisePhone } = require("../utils/phone");
 const { sendBookingDecisionEmail } = require("../utils/mailer");
+const { PRICES } = require("./bookingController");
+const crypto = require("crypto");
 
 // POST /api/admin/login   body: { phone, password }
 async function login(req, res) {
@@ -148,4 +150,81 @@ async function updateBookingStatus(req, res) {
   return res.json({ ...booking.toObject(), notified });
 }
 
-module.exports = { login, listBookings, updateBookingStatus, getStats };
+// POST /api/admin/bookings
+//
+// The practitioner entering a booking taken over WhatsApp. Some customers are
+// not comfortable with the online flow: they send a receipt on WhatsApp and
+// the booking is recorded here instead. No screenshot is needed because the
+// receipt has already been seen, so these are created already approved.
+async function createBookingAsAdmin(req, res) {
+  const {
+    serviceType,
+    customerName,
+    customerPhone,
+    customerEmail,
+    slotTime,
+    amount,
+    adminNote,
+    meetLink,
+  } = req.body || {};
+
+  if (!serviceType || !PRICES[serviceType]) {
+    return res.status(400).json({ error: "Service type ghalat hai." });
+  }
+  if (!customerName || String(customerName).trim().length < 3) {
+    return res.status(400).json({ error: "Customer ka poora naam likhein." });
+  }
+  const phone = normalisePhone(customerPhone);
+  if (!phone || phone.length < 10) {
+    return res.status(400).json({ error: "Durust phone number likhein." });
+  }
+  const email = String(customerEmail || "").trim().toLowerCase();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: "Email address durust nahi hai." });
+  }
+
+  let slot;
+  if (slotTime) {
+    slot = new Date(slotTime);
+    if (Number.isNaN(slot.getTime())) {
+      return res.status(400).json({ error: "Slot ka waqt durust nahi hai." });
+    }
+  }
+
+  // These have no Calendly event, so mint a reference the customer can quote.
+  const slotReference = crypto.randomBytes(4).toString("hex").toUpperCase();
+
+  const booking = await Booking.create({
+    serviceType,
+    amount: Number(amount) > 0 ? Number(amount) : PRICES[serviceType],
+    customerName: String(customerName).trim(),
+    customerPhone: phone,
+    customerEmail: email || undefined,
+    slotTime: slot,
+    slotReference,
+    paymentMethod: "card",
+    createdByAdmin: true,
+    status: "approved",
+    adminNote: adminNote ? String(adminNote).trim() : undefined,
+    meetLink: meetLink ? String(meetLink).trim() : undefined,
+  });
+
+  // Only reaches them if an email was supplied; otherwise the practitioner
+  // tells them on WhatsApp, which is how the booking arrived in the first place.
+  let notified = { sent: false, reason: "no-email" };
+  if (email) {
+    notified = await sendBookingDecisionEmail(booking, {
+      contactNumber: process.env.SESSION_CONTACT_NUMBER || "",
+    });
+  }
+
+  return res.status(201).json({ ...booking.toObject(), notified });
+}
+
+module.exports = {
+  login,
+  listBookings,
+  updateBookingStatus,
+  getStats,
+  createBookingAsAdmin,
+};

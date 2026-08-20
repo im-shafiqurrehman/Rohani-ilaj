@@ -3,7 +3,7 @@
 import { useLang } from "./LanguageProvider";
 import { LANGS, Lang } from "@/lib/i18n";
 
-const LABEL: Record<Lang, string> = { ur: "اردو", en: "EN" };
+const LABEL: Record<Lang, string> = { ur: "اردو", en: "English" };
 
 export default function LanguageToggle() {
   const { lang, setLang } = useLang();

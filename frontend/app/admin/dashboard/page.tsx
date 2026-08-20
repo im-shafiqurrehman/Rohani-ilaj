@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/components/AuthProvider";
 import PalettePicker from "@/components/PalettePicker";
+import AdminNewBooking from "@/components/AdminNewBooking";
 import StatusBadge from "@/components/StatusBadge";
 import { Button, Alert } from "@/components/ui";
 import { formatDateTime, formatSlotRange } from "@/lib/datetime";
@@ -134,6 +135,8 @@ export default function AdminDashboard() {
             />
           </div>
         )}
+
+        <AdminNewBooking onCreated={load} />
 
         <div className="mt-10 flex flex-wrap items-center gap-3">
           {TABS.map((t) => (
@@ -300,6 +303,11 @@ function BookingRow({
                 Registered
               </span>
             )}
+            {b.createdByAdmin && (
+              <span className="rounded-full border border-line px-2.5 py-0.5 font-body text-[10px] tracking-wide text-muted">
+                Added manually
+              </span>
+            )}
             {b.paidByThirdParty && (
               <span className="rounded-full border border-accent/50 px-2.5 py-0.5 font-body text-[10px] tracking-wide text-accent">
                 Third-party payment
@@ -307,7 +315,7 @@ function BookingRow({
             )}
           </div>
           <p className="mt-2 font-body text-sm text-muted">
-            {b.serviceType === "call" ? "Initial call" : "Physical session"} · Rs{" "}
+            {b.serviceType === "call" ? "Initial consultation" : "In-person session"} · Rs{" "}
             {b.amount.toLocaleString()}
           </p>
         </div>
@@ -325,6 +333,14 @@ function BookingRow({
       <div className="mt-6 grid gap-6 border-t border-line pt-6 sm:grid-cols-[180px_1fr]">
         {/* The receipt is the only proof of payment now, so it leads the row
             rather than hiding behind a link the ustad has to think to click. */}
+        {!b.screenshotUrl && (
+          <div className="grid h-36 place-items-center rounded-md border border-dashed border-line px-4 text-center font-body text-[11px] leading-5 text-muted/70">
+            No receipt on file.
+            <br />
+            Taken on WhatsApp.
+          </div>
+        )}
+
         {b.screenshotUrl && (
           <a
             href={b.screenshotUrl}

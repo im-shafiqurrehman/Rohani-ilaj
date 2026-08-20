@@ -30,7 +30,7 @@ export default function Services() {
               className="lift-hover group flex flex-col bg-surface p-9 transition-colors duration-500 ease-editorial hover:bg-surface-2 sm:p-11"
             >
               <p className="eyebrow font-body" dir="ltr">
-                {key === "call" ? "Initial Call" : "Physical Session"}
+                {key === "call" ? "Initial Consultation" : "In-Person Session"}
               </p>
 
               <h3 className="mt-6 text-3xl font-light text-fg">{s.title}</h3>

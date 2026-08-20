@@ -56,7 +56,7 @@ function BookingFlow() {
                     className="group bg-surface p-8 text-start transition-colors duration-500 ease-editorial hover:bg-surface-2 focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
                   >
                     <p className="eyebrow font-body" dir="ltr">
-                      {key === "call" ? "Initial Call" : "Physical Session"}
+                      {key === "call" ? "Initial Consultation" : "In-Person Session"}
                     </p>
                     <h2 className="mt-5 text-2xl font-light text-fg">
                       {svc.title}

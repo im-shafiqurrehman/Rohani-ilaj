@@ -9,13 +9,13 @@ export const dirFor = (lang: Lang) => (lang === "ur" ? "rtl" : "ltr");
 export const DICT = {
   ur: {
     hero: {
-      eyebrow: "Quran & Sunnah · Lahore",
+      eyebrow: "Rohani Ilaj Center",
       title1: "روحانی",
       title2: "علاج",
-      lede: "جادو، جنات، نظرِ بد اور حسد کے مسائل میں شرعی بنیادوں پر رہنمائی اور مشورہ، مکمل رازداری کے ساتھ۔",
-      ctaBook: "نشست بک کریں",
+      lede: "قرآن و سنت کی بنیاد پر روحانی رہنمائی۔ جادو، جنات، نظرِ بد اور حسد کے مسائل میں مشورہ اور علاج، مکمل رازداری کے ساتھ۔",
+      ctaBook: "مشاورت بک کریں",
       ctaServices: "خدمات دیکھیں",
-      note: "صرف شرعی علاج۔ کوئی غیر شرعی عمل نہیں",
+      note: "لاہور میں روبرو اور فون پر۔ کوئی جھوٹا وعدہ نہیں، کوئی ضمانت نہیں۔",
     },
     services: {
       eyebrow: "Services",
@@ -57,7 +57,7 @@ export const DICT = {
       title: "ہمارا اصول",
       lede: "جو بات شریعت میں نہیں، وہ یہاں نہیں ہوگی۔ یہی ہمارا واحد اصول ہے۔",
       points: [
-        { en: "100% Shariah compliant", title: "سو فیصد شرعی", desc: "ہر عمل قرآن و سنت سے ثابت شدہ ہے۔ کوئی تعویذ گنڈا، کوئی خود ساختہ عمل، کچھ بھی غیر شرعی نہیں۔" },
+        { en: "Quran & Sunnah based", title: "قرآن و سنت کی بنیاد پر", desc: "ہر عمل قرآن و سنت سے ثابت شدہ ہے۔ کوئی تعویذ گنڈا اور کوئی خود ساختہ عمل نہیں۔" },
         { en: "Clear boundaries", title: "واضح حدود", desc: "خلافِ شریعت امور پر رابطہ قبول نہیں کیا جاتا، خواہ کوئی بھی پیشکش ہو۔" },
         { en: "Complete privacy", title: "مکمل رازداری", desc: "آپ کی گفتگو اور تفصیلات کسی کے ساتھ شیئر نہیں کی جاتیں۔" },
         { en: "No false promises", title: "کوئی جھوٹا وعدہ نہیں", desc: "شفا اللہ کے ہاتھ میں ہے۔ ہم صرف شرعی رہنمائی اور مشورہ پیش کرتے ہیں۔" },
@@ -203,18 +203,25 @@ export const DICT = {
     footer: {
       tagline:
         "قرآن و سنت کی روشنی میں روحانی رہنمائی۔ نشستیں صرف اپائنٹمنٹ پر، لاہور میں روبرو یا کال پر۔",
+      explore: "صفحات",
+      policies: "پالیسیاں",
+      contactHeading: "رابطہ",
+      noPromises: "کوئی جھوٹا وعدہ نہیں۔ کوئی ضمانت نہیں۔",
+      disclaimerLead: "نوٹ:",
+      disclaimer:
+        "روحانی علاج سنٹر قرآن و سنت کی بنیاد پر روحانی رہنمائی فراہم کرتا ہے۔ یہ طبی، نفسیاتی یا سائیکالوجیکل علاج نہیں ہے اور نہ ہی اُس کا متبادل ہے۔ طبی مسائل کے لیے مستند ڈاکٹر یا ماہرِ نفسیات سے رجوع کریں، اور یہاں کی گفتگو کی بنیاد پر اپنا تجویز کردہ علاج کبھی بند نہ کریں۔",
     },
   },
 
   en: {
     hero: {
-      eyebrow: "Quran & Sunnah · Lahore",
+      eyebrow: "Rohani Ilaj Center",
       title1: "Spiritual",
       title2: "Healing",
-      lede: "Guidance and consultation grounded strictly in Shariah for matters of black magic, jinn, the evil eye and envy, in complete confidence.",
-      ctaBook: "Book a session",
+      lede: "Quran and Sunnah based spiritual guidance for matters of black magic, jinn, the evil eye and envy. In person in Lahore, or by phone. Handled in complete confidence.",
+      ctaBook: "Book a Consultation",
       ctaServices: "View services",
-      note: "Shariah-compliant guidance only. Nothing outside it",
+      note: "Lahore and online. No false promises, no guaranteed results.",
     },
     services: {
       eyebrow: "Services",
@@ -226,13 +233,13 @@ export const DICT = {
       footnote:
         "Both sessions are 30 minutes. A physical session can run longer if the case requires it.",
       call: {
-        title: "Initial Call",
+        title: "Initial Consultation",
         durationValue: "30 minutes",
         note: "By phone call",
         desc: "An opening conversation to understand the matter in detail and give guidance on the next step.",
       },
       physical: {
-        title: "Physical Session",
+        title: "In-Person Session",
         durationValue: "30 minutes",
         note: "In person, Lahore",
         desc: "A face-to-face sitting covering jinn expulsion and other serious matters, handled strictly within Shariah. The duration can be extended as needed.",
@@ -256,7 +263,7 @@ export const DICT = {
       title: "What we stand on",
       lede: "If it is not permitted in Shariah, it does not happen here. That is the whole basis of this practice.",
       points: [
-        { en: "100% Shariah compliant", title: "Entirely within Shariah", desc: "Every practice is established in the Quran and Sunnah. No amulets, nothing invented, nothing outside Shariah." },
+        { en: "Quran \u0026 Sunnah based", title: "Grounded in Quran and Sunnah", desc: "Every practice is established in the Quran and Sunnah. No amulets and nothing invented." },
         { en: "Clear boundaries", title: "Clear boundaries", desc: "Requests that fall outside Shariah are declined, whatever is offered in return." },
         { en: "Complete privacy", title: "Complete privacy", desc: "Your conversation and your details are never shared with anyone." },
         { en: "No false promises", title: "No false promises", desc: "Healing rests with Allah alone. What is offered here is guidance and counsel within Shariah." },
@@ -269,8 +276,8 @@ export const DICT = {
       average: "average rating",
       count: "reviews",
       cta: "Send your feedback",
-      serviceCall: "Initial call",
-      servicePhysical: "Physical session",
+      serviceCall: "Initial consultation",
+      servicePhysical: "In-person session",
     },
     faq: {
       eyebrow: "FAQ",
@@ -401,7 +408,14 @@ export const DICT = {
     whatsappPrefill: "Assalam-o-alaikum, I would like some information about Rohani Ilaj.",
     footer: {
       tagline:
-        "Spiritual guidance grounded strictly in the Quran and Sunnah. Consultations by appointment, in person in Lahore or by call.",
+        "Quran and Sunnah based spiritual guidance. Consultations by appointment, in person in Lahore or by phone.",
+      explore: "Explore",
+      policies: "Policies",
+      contactHeading: "Contact",
+      noPromises: "No false promises. No guaranteed results.",
+      disclaimerLead: "Please note:",
+      disclaimer:
+        "Rohani Ilaj Center offers spiritual guidance grounded in the Quran and Sunnah. It is not medical care, psychiatric care or psychological therapy, and is not a substitute for them. Please consult a qualified doctor or mental health professional for medical concerns, and never stop a prescribed treatment on the basis of a consultation here.",
     },
   },
 };

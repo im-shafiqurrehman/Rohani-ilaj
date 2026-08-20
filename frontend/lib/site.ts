@@ -29,9 +29,17 @@ export const SOCIALS = [
 ].filter((s) => Boolean(s.href));
 
 export const NAV = [
+  { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
-  { href: "/process", label: "How it works" },
+  { href: "/process", label: "How It Works" },
   { href: "/reviews", label: "Reviews" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
+];
+
+export const POLICY_NAV = [
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/terms", label: "Terms & Conditions" },
+  { href: "/refunds", label: "Refund Policy" },
+  { href: "/cancellation", label: "Cancellation & Rescheduling" },
 ];

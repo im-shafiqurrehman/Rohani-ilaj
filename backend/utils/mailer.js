@@ -104,7 +104,7 @@ async function sendBookingDecisionEmail(booking, { contactNumber } = {}) {
   const slot = formatSlotRange(booking.slotTime, booking.slotEndTime);
 
   const rows = [
-    ["Service", booking.serviceType === "call" ? "Initial call" : "Physical session"],
+    ["Service", booking.serviceType === "call" ? "Initial consultation" : "In-person session"],
     ["Amount", `Rs ${Number(booking.amount || 0).toLocaleString()}`],
     slot ? ["Your slot", slot] : null,
     booking.slotReference ? ["Slot reference", booking.slotReference] : null,
@@ -185,7 +185,7 @@ function bookingHtml(heading, subheading, rows, footer) {
 
 function bookingRows(booking) {
   return [
-    ["Service", booking.serviceType === "call" ? "Initial call" : "Physical session"],
+    ["Service", booking.serviceType === "call" ? "Initial consultation" : "In-person session"],
     ["Amount", `Rs ${Number(booking.amount || 0).toLocaleString()}`],
     booking.slotTime
       ? ["Slot", formatSlotRange(booking.slotTime, booking.slotEndTime)]

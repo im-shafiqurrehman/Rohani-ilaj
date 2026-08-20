@@ -97,21 +97,94 @@ body {
   box-shadow: 0 0 40px rgb(var(--accent) / 0.3);
 }
 
-/* Hover lifts and brightens the halo so the primary action visibly responds
-   rather than only changing colour. */
+/* Primary action: the fill shifts to the lighter accent stop, a highlight
+   sweeps across, and the halo widens. A brightness tweak alone did not read as
+   a state change. */
+.glow-button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-image: linear-gradient(
+    135deg,
+    rgb(var(--accent)) 0%,
+    rgb(var(--accent)) 100%
+  );
+  transition: background-image 0.45s ease, box-shadow 0.45s ease,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glow-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    120deg,
+    transparent 25%,
+    rgb(255 255 255 / 0.45) 50%,
+    transparent 75%
+  );
+  transform: translateX(-130%);
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .glow-button {
-    transform: translateY(0);
+  .glow-button::after {
+    transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .glow-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 56px rgb(var(--accent) / 0.5), 0 8px 20px -8px rgb(var(--ink) / 0.6);
+  }
+
+  .glow-button:hover::after {
+    transform: translateX(130%);
   }
 
   .glow-button:active {
     transform: translateY(0);
-    box-shadow: 0 0 32px rgb(var(--accent) / 0.35);
+  }
+}
+
+.glow-button:hover {
+  background-image: linear-gradient(
+    135deg,
+    rgb(var(--accent-2)) 0%,
+    rgb(var(--accent)) 100%
+  );
+  box-shadow: 0 0 64px rgb(var(--accent) / 0.55),
+    0 10px 24px -10px rgb(var(--ink) / 0.7);
+}
+
+.glow-button:active {
+  box-shadow: 0 0 28px rgb(var(--accent) / 0.35);
+}
+
+/* Secondary action: hover FILLS with the accent and flips the text to the
+   colour that sits on it. On Deep Teal that is amber on deep blue, which is
+   the strongest contrast pair in the palette. */
+.btn-outline {
+  border: 1px solid rgb(var(--line));
+  color: rgb(var(--fg));
+  background-color: transparent;
+  transition: background-color 0.4s ease, color 0.4s ease,
+    border-color 0.4s ease, box-shadow 0.4s ease,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-outline:hover {
+  background-color: rgb(var(--accent));
+  border-color: rgb(var(--accent));
+  color: rgb(var(--accent-fg));
+  box-shadow: 0 0 44px rgb(var(--accent) / 0.4);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn-outline:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn-outline:active {
+    transform: translateY(0);
   }
 }
 
@@ -204,6 +277,24 @@ body {
   }
 }
 
+/* ── Route transition ──────────────────────────────────────────────────── */
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .route-enter {
+    animation: route-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
 /* ── Micro-interactions ────────────────────────────────────────────────── */
 
 /* Panels rise very slightly toward the pointer. 3px, not 8 — enough to feel
@@ -211,11 +302,12 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .lift-hover {
     transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.5s ease;
   }
 
   .lift-hover:hover {
-    transform: translateY(-3px);
+    transform: translateY(-4px);
   }
 }
 
@@ -295,4 +387,50 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ── Policy documents ──────────────────────────────────────────────────── */
+.policy h2 {
+  color: rgb(var(--fg));
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.policy p {
+  margin-bottom: 1rem;
+}
+
+.policy ul {
+  list-style: disc;
+  padding-inline-start: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.policy li {
+  margin-bottom: 0.5rem;
+}
+
+.policy strong {
+  color: rgb(var(--fg));
+  font-weight: 500;
+}
+
+/* Card hover: an accent hairline and a soft halo, so a whole panel reads as
+   interactive rather than only its link. */
+.lift-hover {
+  position: relative;
+  box-shadow: inset 0 0 0 1px transparent;
+}
+
+.lift-hover:hover {
+  box-shadow: inset 0 0 0 1px rgb(var(--accent) / 0.45),
+    0 18px 40px -24px rgb(var(--accent) / 0.4);
+}
+
+/* Nav links resolve to the accent, not just to plain foreground. */
+.link-underline:hover,
+.link-underline:focus-visible {
+  color: rgb(var(--accent));
 }

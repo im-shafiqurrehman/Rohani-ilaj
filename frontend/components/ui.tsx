@@ -108,7 +108,7 @@ const BUTTON_BASE =
 const BUTTON_VARIANTS = {
   // The one gold fill. Use at most once per viewport.
   primary: "glow-button bg-accent text-accent-fg hover:brightness-110",
-  outline: "border border-line text-fg hover:border-accent/60 hover:text-accent",
+  outline: "btn-outline",
   ghost: "text-muted hover:text-fg",
 };
 

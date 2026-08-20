@@ -37,6 +37,7 @@ export type Booking = {
   slotReference?: string;
   calendlyEventName?: string;
   paidByThirdParty?: boolean;
+  createdByAdmin?: boolean;
   paymentMethod: string;
   /** Only present on bookings taken before the form was simplified. */
   accountTitle?: string;
@@ -49,6 +50,30 @@ export type Booking = {
 };
 
 export type NotifyResult = { sent: boolean; reason?: string };
+
+export type NewBookingInput = {
+  serviceType: "call" | "physical";
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  slotTime?: string;
+  amount?: number;
+  adminNote?: string;
+  meetLink?: string;
+};
+
+/** Records a booking taken over WhatsApp. Created already approved, since the
+ *  receipt was checked before it got here. */
+export async function createAdminBooking(input: NewBookingInput) {
+  const res = await fetch(`${API_URL}/admin/bookings`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(input),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Booking add nahi ho saki.");
+  return data as Booking & { notified?: NotifyResult };
+}
 
 export type Stats = {
   pending: number;

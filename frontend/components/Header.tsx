@@ -44,13 +44,8 @@ export default function Header() {
             priority
             className="h-9 w-auto"
           />
-          <span className="flex flex-col leading-none">
-            <span className="text-glow font-display text-[17px] font-medium tracking-wide">
-              Rohani Ilaj
-            </span>
-            <span className="mt-0.5 font-body text-[9px] tracking-[0.28em] text-muted">
-              CENTER
-            </span>
+          <span className="text-glow font-display text-[17px] font-medium tracking-wide">
+            Rohani Ilaj Center
           </span>
         </Link>
 
@@ -67,8 +62,12 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2.5">
-          <LanguageToggle />
-          <PalettePicker />
+          <span className="hidden sm:inline-flex">
+            <LanguageToggle />
+          </span>
+          <span className="hidden sm:inline-flex">
+            <PalettePicker />
+          </span>
           <ThemeToggle />
 
           {!loading &&
@@ -90,9 +89,9 @@ export default function Header() {
 
           <Link
             href="/booking"
-            className="glow-button hidden rounded-full bg-accent px-5 py-2 font-body text-[13px] tracking-wide text-accent-fg transition-all duration-500 ease-editorial hover:brightness-110 sm:inline-flex"
+            className="glow-button inline-flex rounded-full bg-accent px-4 py-2 font-body text-[13px] tracking-wide text-accent-fg transition-all duration-500 ease-editorial hover:brightness-110 sm:px-5"
           >
-            Book a session
+            Book Now
           </Link>
 
           <button
@@ -133,7 +132,7 @@ export default function Header() {
               onClick={() => setOpen(false)}
               className="flex-1 rounded-full bg-accent py-2.5 text-center font-body text-sm text-accent-fg"
             >
-              Book a session
+              Book Now
             </Link>
             <Link
               href={user ? "/account" : "/account/login"}
