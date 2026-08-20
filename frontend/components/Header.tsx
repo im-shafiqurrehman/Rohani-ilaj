@@ -62,12 +62,8 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2.5">
-          <span className="hidden sm:inline-flex">
-            <LanguageToggle />
-          </span>
-          <span className="hidden sm:inline-flex">
-            <PalettePicker />
-          </span>
+          <LanguageToggle />
+          <PalettePicker />
           <ThemeToggle />
 
           {!loading &&
@@ -89,7 +85,7 @@ export default function Header() {
 
           <Link
             href="/booking"
-            className="glow-button inline-flex rounded-full bg-accent px-4 py-2 font-body text-[13px] tracking-wide text-accent-fg transition-all duration-500 ease-editorial hover:brightness-110 sm:px-5"
+            className="glow-button hidden rounded-full bg-accent px-5 py-2 font-body text-[13px] tracking-wide text-accent-fg sm:inline-flex"
           >
             Book Now
           </Link>
@@ -122,22 +118,13 @@ export default function Header() {
               </a>
             ))}
           </nav>
-          <div className="mt-5 flex items-center justify-between gap-3">
-            <LanguageToggle />
-            <PalettePicker />
-          </div>
-          <div className="mt-4 flex items-center gap-3">
-            <Link
-              href="/booking"
-              onClick={() => setOpen(false)}
-              className="flex-1 rounded-full bg-accent py-2.5 text-center font-body text-sm text-accent-fg"
-            >
-              Book Now
-            </Link>
+          {/* No Book button here: it floats on every screen, at every scroll
+              position. The switchers moved up into the header row. */}
+          <div className="mt-5">
             <Link
               href={user ? "/account" : "/account/login"}
               onClick={() => setOpen(false)}
-              className="rounded-full border border-line px-5 py-2.5 font-body text-sm text-fg"
+              className="btn-outline inline-flex w-full justify-center rounded-full px-5 py-2.5 font-body text-sm"
             >
               {user ? "Account" : "Sign in"}
             </Link>

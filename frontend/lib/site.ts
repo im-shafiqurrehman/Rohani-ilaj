@@ -30,6 +30,7 @@ export const SOCIALS = [
 
 export const NAV = [
   { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
   { href: "/services", label: "Services" },
   { href: "/process", label: "How It Works" },
   { href: "/reviews", label: "Reviews" },

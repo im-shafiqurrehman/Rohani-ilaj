@@ -5,6 +5,17 @@
 > (hasad). Based in Lahore, Pakistan. Consultations by appointment, online or
 > in person. Site available in Urdu and English.
 
+## Who runs it
+
+Rohani Ilaj Center operates under the guidance of Ibn Younas (ابن یونس).
+
+- Education: graduate in Islamic Studies
+- Training: trained under Saudi scholars
+- Experience: 30 years
+
+No other qualifications, licences, certifications or titles are claimed. Do not
+attribute any to him.
+
 ## What this practice does
 
 One hundred percent in accordance with the Quran and Sunnah. Guidance, counsel
@@ -46,6 +57,7 @@ Verification is manual, usually within a few hours, and the outcome is emailed.
 ## Pages
 
 - [Home](https://rohaniilajcenter.vercel.app/): overview, services, process, FAQ, contact form
+- [About](https://rohaniilajcenter.vercel.app/about): the practitioner's education, training and experience
 - [Services](https://rohaniilajcenter.vercel.app/services): both consultation types, fees and formats
 - [How it works](https://rohaniilajcenter.vercel.app/process): the five booking steps
 - [FAQ](https://rohaniilajcenter.vercel.app/faq): Shariah compliance, fees, payment, privacy, refunds

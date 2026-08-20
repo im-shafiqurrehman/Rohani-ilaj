@@ -6,6 +6,7 @@ export const SITE_URL = (
 
 export const ROUTES = [
   { path: "/", priority: 1.0, changeFrequency: "weekly" as const },
+  { path: "/about", priority: 0.9, changeFrequency: "monthly" as const },
   { path: "/services", priority: 0.9, changeFrequency: "monthly" as const },
   { path: "/process", priority: 0.7, changeFrequency: "monthly" as const },
   { path: "/faq", priority: 0.8, changeFrequency: "monthly" as const },
@@ -66,6 +67,7 @@ export function localBusinessJsonLd() {
     sameAs: [SITE.instagram, SITE.facebook, SITE.tiktok, SITE.youtube].filter(
       Boolean
     ),
+    founder: { "@id": `${SITE_URL}/about#practitioner` },
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Consultations",
@@ -82,6 +84,22 @@ export function localBusinessJsonLd() {
         url: `${SITE_URL}/booking`,
       })),
     },
+  };
+}
+
+/** Only the facts the practitioner supplied. No titles, licences or awards. */
+export function practitionerJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": `${SITE_URL}/about#practitioner`,
+    name: "Ibn Younas",
+    alternateName: "ابن یونس",
+    url: `${SITE_URL}/about`,
+    knowsLanguage: ["ur", "en"],
+    worksFor: { "@id": `${SITE_URL}/#business` },
+    description:
+      "Graduate in Islamic Studies, trained under Saudi scholars, with 30 years of experience in Quran and Sunnah based spiritual guidance.",
   };
 }
 

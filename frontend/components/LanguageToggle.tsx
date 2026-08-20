@@ -4,6 +4,8 @@ import { useLang } from "./LanguageProvider";
 import { LANGS, Lang } from "@/lib/i18n";
 
 const LABEL: Record<Lang, string> = { ur: "اردو", en: "English" };
+/** The header is tight on a 360px screen, so English shortens to EN there. */
+const SHORT: Record<Lang, string> = { ur: "اردو", en: "EN" };
 
 export default function LanguageToggle() {
   const { lang, setLang } = useLang();
@@ -30,7 +32,8 @@ export default function LanguageToggle() {
                 : "text-muted hover:text-fg"
             }`}
           >
-            {LABEL[l]}
+            <span className="sm:hidden">{SHORT[l]}</span>
+            <span className="hidden sm:inline">{LABEL[l]}</span>
           </button>
         );
       })}
