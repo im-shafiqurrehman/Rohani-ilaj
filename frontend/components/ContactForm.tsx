@@ -5,10 +5,11 @@ import { Section, Field, Button, Alert } from "./ui";
 import Reveal from "./Reveal";
 import SocialIcons from "./SocialIcons";
 import { ContactError, ContactTopic, submitContact } from "@/lib/api";
+import { isValidPkMobile } from "@/lib/phone";
 import { SITE } from "@/lib/site";
 import { useLang } from "./LanguageProvider";
 
-const TOPIC_KEYS: ContactTopic[] = ["sawal", "booking", "tassur", "deegar"];
+const TOPIC_KEYS: ContactTopic[] = ["sawal", "booking", "deegar"];
 
 export default function ContactForm() {
   const { t } = useLang();
@@ -27,8 +28,7 @@ export default function ContactForm() {
     const message = String(data.get("message") || "").trim();
 
     if (name.length < 3) return setError(t.contact.errName);
-    if (phone.replace(/\D/g, "").length < 10)
-      return setError(t.contact.errPhone);
+    if (!isValidPkMobile(phone)) return setError(t.contact.errPhone);
     if (message.length < 10)
       return setError(t.contact.errMessage);
 

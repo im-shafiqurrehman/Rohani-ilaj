@@ -178,6 +178,13 @@ body {
   box-shadow: 0 0 44px rgb(var(--accent) / 0.4);
 }
 
+/* The fill is the accent colour, so an accent-tinted icon inside would become
+   invisible against it. Force any child SVG to invert along with the text. */
+.btn-outline:hover svg,
+.btn-outline:focus-visible svg {
+  color: rgb(var(--accent-fg));
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .btn-outline:hover {
     transform: translateY(-2px);
@@ -278,20 +285,23 @@ body {
 }
 
 /* ── Route transition ──────────────────────────────────────────────────── */
+/* Opacity only. Do NOT animate transform, filter or perspective here: this
+   wrapper is an ancestor of the floating WhatsApp button, and any of those
+   makes it the containing block for position:fixed, so the button stops
+   sticking to the viewport and scrolls away with the page. The per-section
+   Reveal animations supply the movement instead. */
 @keyframes route-enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .route-enter {
-    animation: route-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: route-enter 0.4s ease both;
   }
 }
 

@@ -10,6 +10,7 @@ const { normalisePhone } = require("./utils/phone");
 const bookingRoutes = require("./routes/bookings");
 const adminRoutes = require("./routes/admin");
 const contactRoutes = require("./routes/contact");
+const reviewRoutes = require("./routes/reviews");
 const authRoutes = require("./routes/auth");
 
 // Fail fast with a clear message instead of a confusing crash later on.
@@ -70,6 +71,16 @@ app.use(
 );
 app.use(express.json());
 
+// Baseline for everything. Generous enough never to affect a real visitor,
+// low enough to blunt a script hammering the API.
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  message: { error: "Bohat zyada requests. Thori dair baad koshish karein." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Stops someone from spamming hundreds of fake bookings.
 const bookingLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
@@ -84,6 +95,37 @@ const contactLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 8, // 8 messages per IP per hour
   message: { error: "Bohat zyada paighamat. Aik ghante baad dobara try karein." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Reviews get their own budget. Sharing an instance with the contact limiter
+// meant one counter for both, so submitting a review consumed the quota for
+// asking a question.
+const reviewLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: "Bohat zyada tassurat. Aik ghante baad try karein." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Authenticated admin endpoints. Guards against a leaked token being used to
+// scrape the whole booking table.
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { error: "Too many requests." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Reading your own session/bookings is harmless and happens on every page
+// load, so it gets a separate, looser budget than the credential endpoints.
+const sessionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { error: "Bohat zyada requests. Thori dair baad koshish karein." },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -106,13 +148,16 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+app.use("/api", globalLimiter);
+
 app.use("/api/bookings", bookingLimiter, bookingRoutes);
 app.use("/api/contact", contactLimiter, contactRoutes);
+app.use("/api/reviews", reviewLimiter, reviewRoutes);
 app.use("/api/auth/signup", authLimiter);
 app.use("/api/auth/login", authLimiter);
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", sessionLimiter, authRoutes);
 app.use("/api/admin/login", loginLimiter);
-app.use("/api/admin", adminRoutes);
+app.use("/api/admin", adminLimiter, adminRoutes);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 

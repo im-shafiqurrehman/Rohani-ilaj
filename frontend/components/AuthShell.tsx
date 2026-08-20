@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ReactNode } from "react";
 import ThemeToggle from "./ThemeToggle";
-import WhatsAppFab from "./WhatsAppFab";
+import FloatingActions from "./FloatingActions";
 import PalettePicker from "./PalettePicker";
 
 /** Centred, chrome-free frame shared by sign in and sign up. */
@@ -77,7 +77,7 @@ export default function AuthShell({
           </div>
         )}
       </div>
-      {!staff && <WhatsAppFab />}
+      {!staff && <FloatingActions />}
     </main>
   );
 }

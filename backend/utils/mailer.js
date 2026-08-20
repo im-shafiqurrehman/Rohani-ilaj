@@ -272,8 +272,66 @@ async function verifyConnection() {
   }
 }
 
+/**
+ * A review submitted for publication. Sent to the practitioner rather than
+ * published automatically: nothing goes on the site without a human reading it
+ * first, and the consent flag is recorded in the email so there is a record of
+ * it having been given.
+ */
+async function sendReviewEmail({ name, city, service, rating, review, consent, contact }) {
+  const tx = getTransporter();
+  if (!tx || !process.env.CONTACT_TO_EMAIL) {
+    const err = new Error("SMTP is not configured");
+    err.code = "SMTP_NOT_CONFIGURED";
+    throw err;
+  }
+
+  const rows = [
+    ["Name", name],
+    ["City", city || "-"],
+    ["Service", service],
+    ["Rating", `${rating} / 5`],
+    ["Contact", contact || "-"],
+    ["Permission to publish", consent ? "YES - explicitly granted" : "NO"],
+  ];
+
+  const text =
+    rows.map(([k, v]) => `${k}: ${v}`).join("\n") + `\n\nReview:\n${review}\n`;
+
+  const html = `
+    <div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#0B1B2B;max-width:560px">
+      <h2 style="margin:0 0 4px">New review submitted</h2>
+      <p style="margin:0 0 18px;color:#4A6076;font-size:13px">Rohani Ilaj Center</p>
+      <table cellpadding="8" style="border-collapse:collapse;font-size:14px;width:100%">
+        ${rows
+          .map(
+            ([k, v]) =>
+              `<tr>
+                 <td style="border:1px solid #D3E1ED;background:#F6F9FC;font-weight:600;white-space:nowrap">${escapeHtml(k)}</td>
+                 <td style="border:1px solid #D3E1ED">${escapeHtml(String(v))}</td>
+               </tr>`
+          )
+          .join("")}
+      </table>
+      <h3 style="margin:20px 0 6px;font-size:14px">Review</h3>
+      <p style="white-space:pre-wrap;font-size:14px;line-height:1.7;border-right:3px solid #D3E1ED;padding-right:12px;margin:0">${escapeHtml(review)}</p>
+      <p style="margin:18px 0 0;font-size:12px;color:#4A6076">
+        ${consent ? "The reviewer ticked the box agreeing this may be published." : "The reviewer did NOT agree to publication. Do not publish it."}
+      </p>
+    </div>`;
+
+  return tx.sendMail({
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to: process.env.CONTACT_TO_EMAIL,
+    subject: `New review (${rating}/5) from ${name}`,
+    text,
+    html,
+  });
+}
+
 module.exports = {
   verifyConnection,
+  sendReviewEmail,
   sendContactEmail,
   sendBookingDecisionEmail,
   sendBookingReceivedEmail,

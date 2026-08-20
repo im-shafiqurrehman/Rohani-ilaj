@@ -1,5 +1,5 @@
 const Booking = require("../models/Booking");
-const { normalisePhone } = require("../utils/phone");
+const { normalisePhone, isValidPkMobile } = require("../utils/phone");
 const { fetchScheduledEvent, slotReference } = require("../utils/calendly");
 const { sendNewBookingAlert } = require("../utils/mailer");
 
@@ -27,8 +27,11 @@ async function createBooking(req, res) {
     if (!serviceType || !PRICES[serviceType]) {
       return res.status(400).json({ error: "Service type ghalat hai." });
     }
-    if (!customerName || !customerPhone) {
-      return res.status(400).json({ error: "Naam aur phone number zaroori hain." });
+    if (!customerName) {
+      return res.status(400).json({ error: "Naam likhna zaroori hai." });
+    }
+    if (!isValidPkMobile(customerPhone)) {
+      return res.status(400).json({ error: "Durust Pakistani mobile number likhein, jaise 03001234567." });
     }
     // Browser `required` is bypassable; this is the real gate.
     const email = String(customerEmail || "").trim().toLowerCase();

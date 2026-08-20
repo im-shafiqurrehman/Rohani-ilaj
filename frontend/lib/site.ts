@@ -28,7 +28,19 @@ export const SOCIALS = [
   { key: "youtube", label: "YouTube", href: SITE.youtube },
 ].filter((s) => Boolean(s.href));
 
+/* Header carries five items. "How It Works" and "Reviews" are both sections of
+ * the home page, so they live in the footer instead rather than widening the
+ * header past what fits on a laptop. */
 export const NAV = [
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/services", label: "Services" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/contact", label: "Contact" },
+];
+
+/** Everything, including the pages the header leaves out. */
+export const FOOTER_NAV = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
   { href: "/services", label: "Services" },
@@ -36,6 +48,7 @@ export const NAV = [
   { href: "/reviews", label: "Reviews" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
+  { href: "/feedback", label: "Share Your Experience" },
 ];
 
 export const POLICY_NAV = [

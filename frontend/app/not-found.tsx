@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui";
 import { useLang } from "@/components/LanguageProvider";
-import WhatsAppFab from "@/components/WhatsAppFab";
+import FloatingActions from "@/components/FloatingActions";
 
 export default function NotFound() {
   const { t } = useLang();
@@ -23,7 +23,7 @@ export default function NotFound() {
           {t.account.backHome}
         </Button>
       </div>
-      <WhatsAppFab />
+      <FloatingActions />
     </main>
   );
 }

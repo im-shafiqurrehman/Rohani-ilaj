@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Booking = require("../models/Booking");
-const { normalisePhone } = require("../utils/phone");
+const { normalisePhone, isValidPkMobile } = require("../utils/phone");
 
 const TOKEN_TTL = "30d";
 
@@ -40,8 +40,8 @@ async function signup(req, res) {
     return res.status(400).json({ error: "Poora naam likhein." });
   }
   const normalised = normalisePhone(phone);
-  if (!normalised || normalised.length < 10) {
-    return res.status(400).json({ error: "Durust phone number likhein." });
+  if (!isValidPkMobile(phone)) {
+    return res.status(400).json({ error: "Durust Pakistani mobile number likhein, jaise 03001234567." });
   }
   if (!password || String(password).length < 6) {
     return res.status(400).json({ error: "Password kam az kam 6 characters ka ho." });

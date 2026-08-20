@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import SocialIcons from "./SocialIcons";
-import { NAV, POLICY_NAV, SITE, WHATSAPP_LINK } from "@/lib/site";
+import { FOOTER_NAV, POLICY_NAV, SITE, WHATSAPP_LINK } from "@/lib/site";
 import { useLang } from "./LanguageProvider";
 
 export default function Footer() {
@@ -37,7 +37,7 @@ export default function Footer() {
               {t.footer.explore}
             </h3>
             <ul className="mt-5 space-y-3">
-              {NAV.map((l) => (
+              {FOOTER_NAV.map((l) => (
                 <li key={l.href}>
                   <a
                     href={l.href}

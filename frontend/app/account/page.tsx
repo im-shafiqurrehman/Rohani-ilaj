@@ -11,7 +11,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { fetchMyBookings, MyBooking } from "@/lib/auth";
 import { CONTACT_LINK } from "@/lib/site";
 import { useLang } from "@/components/LanguageProvider";
-import WhatsAppFab from "@/components/WhatsAppFab";
+import FloatingActions from "@/components/FloatingActions";
 import { formatDateTime, formatSlotRange } from "@/lib/datetime";
 
 export default function AccountPage() {
@@ -39,7 +39,7 @@ export default function AccountPage() {
         <main className="grid min-h-[60vh] place-items-center px-6">
           <p className="font-body text-sm text-muted">{t.auth.loading}</p>
         </main>
-        <WhatsAppFab />
+        <FloatingActions />
       </>
     );
   }
@@ -213,7 +213,7 @@ export default function AccountPage() {
         )}
       </main>
       <Footer />
-      <WhatsAppFab />
+      <FloatingActions />
     </>
   );
 }

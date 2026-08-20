@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Booking = require("../models/Booking");
-const { normalisePhone } = require("../utils/phone");
+const { normalisePhone, isValidPkMobile } = require("../utils/phone");
 const { sendBookingDecisionEmail } = require("../utils/mailer");
 const { PRICES } = require("./bookingController");
 const crypto = require("crypto");
@@ -174,10 +174,10 @@ async function createBookingAsAdmin(req, res) {
   if (!customerName || String(customerName).trim().length < 3) {
     return res.status(400).json({ error: "Customer ka poora naam likhein." });
   }
-  const phone = normalisePhone(customerPhone);
-  if (!phone || phone.length < 10) {
-    return res.status(400).json({ error: "Durust phone number likhein." });
+  if (!isValidPkMobile(customerPhone)) {
+    return res.status(400).json({ error: "Durust Pakistani mobile number likhein, jaise 03001234567." });
   }
+  const phone = normalisePhone(customerPhone);
   const email = String(customerEmail || "").trim().toLowerCase();
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ error: "Email address durust nahi hai." });

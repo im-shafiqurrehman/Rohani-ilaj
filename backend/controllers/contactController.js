@@ -1,4 +1,5 @@
 const { sendContactEmail, isConfigured } = require("../utils/mailer");
+const { isValidPkMobile } = require("../utils/phone");
 
 // The topics the public form offers. Anything else is rejected so the email
 // subject line can't be set to arbitrary text by a caller.
@@ -25,9 +26,8 @@ async function submitContact(req, res) {
   if (!name || String(name).trim().length < 3) {
     return res.status(400).json({ error: "Poora naam likhein." });
   }
-  const digits = String(phone || "").replace(/\D/g, "");
-  if (digits.length < 10) {
-    return res.status(400).json({ error: "Durust phone number likhein." });
+  if (!isValidPkMobile(phone)) {
+    return res.status(400).json({ error: "Durust Pakistani mobile number likhein, jaise 03001234567." });
   }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim())) {
     return res.status(400).json({ error: "Email address durust nahi hai." });

@@ -12,6 +12,7 @@ export const ROUTES = [
   { path: "/faq", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/reviews", priority: 0.6, changeFrequency: "weekly" as const },
   { path: "/contact", priority: 0.7, changeFrequency: "monthly" as const },
+  { path: "/feedback", priority: 0.5, changeFrequency: "monthly" as const },
   { path: "/booking", priority: 0.9, changeFrequency: "monthly" as const },
 ];
 

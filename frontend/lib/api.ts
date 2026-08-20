@@ -39,7 +39,7 @@ export async function submitBooking(payload: BookingPayload) {
   return data as { message: string; bookingId: string };
 }
 
-export type ContactTopic = "sawal" | "booking" | "tassur" | "deegar";
+export type ContactTopic = "sawal" | "booking" | "deegar";
 
 export type ContactPayload = {
   name: string;
@@ -73,6 +73,34 @@ export async function submitContact(payload: ContactPayload) {
   if (!res.ok) {
     throw new ContactError(
       data.error || "Could not send the message.",
+      data.code,
+      data.contactEmail
+    );
+  }
+  return data as { message: string };
+}
+
+export type ReviewPayload = {
+  name: string;
+  city?: string;
+  service: "call" | "physical";
+  rating: number;
+  review: string;
+  contact?: string;
+  consent: boolean;
+  website?: string;
+};
+
+export async function submitReview(payload: ReviewPayload) {
+  const res = await fetch(`${API_URL}/reviews`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new ContactError(
+      data.error || "Could not send the review.",
       data.code,
       data.contactEmail
     );

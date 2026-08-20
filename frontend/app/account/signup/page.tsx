@@ -7,6 +7,7 @@ import AuthShell from "@/components/AuthShell";
 import { Field, Button, Alert } from "@/components/ui";
 import { useAuth } from "@/components/AuthProvider";
 import { signup } from "@/lib/auth";
+import { isValidPkMobile } from "@/lib/phone";
 import { useLang } from "@/components/LanguageProvider";
 
 export default function SignupPage() {
@@ -22,6 +23,9 @@ export default function SignupPage() {
 
     const password = String(data.get("password") || "");
     const email = String(data.get("email") || "").trim();
+    const phone = String(data.get("phone") || "");
+
+    if (!isValidPkMobile(phone)) return setError(t.contact.errPhone);
 
     // Required: booking updates and the post-approval contact number are both
     // delivered by email, so an account without one cannot be notified.

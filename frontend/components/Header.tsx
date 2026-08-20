@@ -118,13 +118,21 @@ export default function Header() {
               </a>
             ))}
           </nav>
-          {/* No Book button here: it floats on every screen, at every scroll
-              position. The switchers moved up into the header row. */}
-          <div className="mt-5">
+          {/* Book lives here on phones. The header row at 360px has no space
+              for it once the switchers are in, and WhatsApp is the only thing
+              that floats. */}
+          <div className="mt-5 flex items-center gap-3">
+            <Link
+              href="/booking"
+              onClick={() => setOpen(false)}
+              className="glow-button flex-1 rounded-full bg-accent py-3 text-center font-body text-sm text-accent-fg"
+            >
+              Book Now
+            </Link>
             <Link
               href={user ? "/account" : "/account/login"}
               onClick={() => setOpen(false)}
-              className="btn-outline inline-flex w-full justify-center rounded-full px-5 py-2.5 font-body text-sm"
+              className="btn-outline rounded-full px-5 py-3 font-body text-sm"
             >
               {user ? "Account" : "Sign in"}
             </Link>

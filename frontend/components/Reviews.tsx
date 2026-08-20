@@ -70,7 +70,7 @@ export default function Reviews() {
       </div>
 
       <div className="mt-12 text-center">
-        <Button as={Link} href="/contact">
+        <Button as={Link} href="/feedback">
           {t.reviews.cta}
           <span aria-hidden="true">←</span>
         </Button>

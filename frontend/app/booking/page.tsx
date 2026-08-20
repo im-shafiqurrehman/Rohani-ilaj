@@ -8,6 +8,7 @@ import CalendlyEmbed from "@/components/CalendlyEmbed";
 import PaymentForm from "@/components/PaymentForm";
 import { Field, Button, Alert } from "@/components/ui";
 import { useAuth } from "@/components/AuthProvider";
+import { isValidPkMobile } from "@/lib/phone";
 import { useLang } from "@/components/LanguageProvider";
 
 const CALENDLY_URLS = {
@@ -136,7 +137,7 @@ function ContactStep({
     if (name.trim().length < 3) {
       return setError(t.contact.errName);
     }
-    if (phone.replace(/\D/g, "").length < 10) {
+    if (!isValidPkMobile(phone)) {
       return setError(t.contact.errPhone);
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
