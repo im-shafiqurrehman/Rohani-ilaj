@@ -3,6 +3,7 @@
 import { Section } from "./ui";
 import Reveal from "./Reveal";
 import { AVERAGE_RATING, REVIEWS, REVIEWS_ARE_REAL } from "@/lib/reviews";
+import Link from "next/link";
 import { useLang } from "./LanguageProvider";
 
 function Stars({ rating, size = 13 }: { rating: number; size?: number }) {
@@ -76,13 +77,14 @@ export default function Reviews() {
       </div>
 
       <div className="mt-12 text-center">
-        <a
-          href="#contact"
+        <Link
+          href="/contact"
           className="inline-flex items-center gap-2 border-b border-line pb-1 font-body text-sm text-fg transition-colors duration-500 ease-editorial hover:border-accent hover:text-accent"
         >
           {t.reviews.cta}
           <span aria-hidden="true">←</span>
-        </a>
+        </Link>
+
       </div>
     </Section>
   );

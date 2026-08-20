@@ -15,7 +15,7 @@ export const SITE = {
 };
 
 /** Public "get in touch" target — the on-site form. */
-export const CONTACT_LINK = "/#contact";
+export const CONTACT_LINK = "/contact";
 
 export const WHATSAPP_LINK = SITE.whatsapp
   ? `https://wa.me/${SITE.whatsapp.replace(/\D/g, "")}`
@@ -29,9 +29,9 @@ export const SOCIALS = [
 ].filter((s) => Boolean(s.href));
 
 export const NAV = [
-  { href: "/#services", label: "Services" },
-  { href: "/#process", label: "How it works" },
-  { href: "/#reviews", label: "Reviews" },
-  { href: "/#faq", label: "FAQ" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/services", label: "Services" },
+  { href: "/process", label: "How it works" },
+  { href: "/reviews", label: "Reviews" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/contact", label: "Contact" },
 ];

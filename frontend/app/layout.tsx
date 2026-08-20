@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/components/LanguageProvider";
 import { DEFAULT_LANG, dirFor } from "@/lib/i18n";
 import {
   DEFAULT_PALETTE,
+  DEFAULT_THEME,
   PALETTE_IDS,
   paletteCss,
   themeColor,
@@ -62,7 +63,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   // Matches the default palette's dark ink; ThemeProvider rewrites it on switch.
-  themeColor: themeColor(DEFAULT_PALETTE, "dark"),
+  themeColor: themeColor(DEFAULT_PALETTE, DEFAULT_THEME),
   width: "device-width",
   initialScale: 1,
 };
@@ -78,9 +79,9 @@ const NO_FLASH = `
     el.setAttribute('lang', lang);
     el.setAttribute('dir', lang === 'ur' ? 'rtl' : 'ltr');
     var storedTheme = localStorage.getItem('rohani-theme');
-    var theme = storedTheme === 'light' || storedTheme === 'dark'
+    var theme = (storedTheme === 'light' || storedTheme === 'dark')
       ? storedTheme
-      : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      : ${JSON.stringify(DEFAULT_THEME)};
     var storedPalette = localStorage.getItem('rohani-palette');
     var palette = PALETTES.indexOf(storedPalette) !== -1
       ? storedPalette
@@ -90,7 +91,7 @@ const NO_FLASH = `
   } catch (e) {
     el.setAttribute('lang', ${JSON.stringify(DEFAULT_LANG)});
     el.setAttribute('dir', ${JSON.stringify(dirFor(DEFAULT_LANG))});
-    el.setAttribute('data-theme', 'dark');
+    el.setAttribute('data-theme', ${JSON.stringify(DEFAULT_THEME)});
     el.setAttribute('data-palette', ${JSON.stringify(DEFAULT_PALETTE)});
   }
 })();
@@ -105,7 +106,7 @@ export default function RootLayout({
     <html
       lang={DEFAULT_LANG}
       dir={dirFor(DEFAULT_LANG)}
-      data-theme="dark"
+      data-theme={DEFAULT_THEME}
       data-palette={DEFAULT_PALETTE}
       suppressHydrationWarning
     >

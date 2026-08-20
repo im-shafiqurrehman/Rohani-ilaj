@@ -42,12 +42,12 @@ export default function HeroCopy({ hasBanner }: { hasBanner: boolean }) {
         >
           {t.hero.ctaBook}
         </Link>
-        <a
-          href="#services"
+        <Link
+          href="/services"
           className="w-full rounded-full border border-line px-8 py-3.5 text-center font-body text-sm tracking-wide text-fg transition-all duration-500 ease-editorial hover:border-accent/60 hover:text-accent sm:w-auto"
         >
           {t.hero.ctaServices}
-        </a>
+        </Link>
       </div>
 
       <p

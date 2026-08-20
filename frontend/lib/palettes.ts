@@ -201,7 +201,11 @@ export const PALETTES: Palette[] = [
   },
 ];
 
-export const DEFAULT_PALETTE = "terminal";
+export const DEFAULT_PALETTE = "teal";
+
+/** First-time visitors always land on dark, regardless of their OS setting.
+ *  A stored choice still wins on later visits. */
+export const DEFAULT_THEME: "dark" | "light" = "dark";
 export const PALETTE_IDS = PALETTES.map((p) => p.id);
 
 function rgb(hex: string) {

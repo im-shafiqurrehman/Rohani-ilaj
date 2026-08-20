@@ -53,13 +53,16 @@ async function doConnect() {
         `MongoDB connection failed (attempt ${attempt}/${MAX_ATTEMPTS}): ${err.message}`
       );
       if (last) {
-        console.error(
+        const detail =
           "\nGiving up. Common causes:\n" +
-            "  - No internet, or DNS cannot resolve the Atlas SRV record\n" +
-            "  - Your current IP is not in the Atlas Network Access allowlist\n" +
-            "  - The free-tier cluster is paused (Atlas pauses after 60 idle days)\n"
-        );
-        process.exit(1);
+          "  - No internet, or DNS cannot resolve the Atlas SRV record\n" +
+          "  - The host IP is not in the Atlas Network Access allowlist\n" +
+          "    (serverless has no fixed IP — use 0.0.0.0/0)\n" +
+          "  - The free-tier cluster is paused (Atlas pauses after 60 idle days)\n";
+        console.error(detail);
+        // Throw rather than exit: on serverless, exiting kills the container
+        // mid-request and the caller just sees a bare 500.
+        throw err;
       }
       console.error(`Retrying in ${delay / 1000}s…`);
       await wait(delay);

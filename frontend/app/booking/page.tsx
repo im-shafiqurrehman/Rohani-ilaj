@@ -2,9 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import WhatsAppFab from "@/components/WhatsAppFab";
+import PageShell from "@/components/PageShell";
 import StepIndicator from "@/components/StepIndicator";
 import CalendlyEmbed from "@/components/CalendlyEmbed";
 import PaymentForm from "@/components/PaymentForm";
@@ -224,11 +222,8 @@ export default function BookingPage() {
   const { t } = useLang();
 
   return (
-    <>
-      <Header />
-      <WhatsAppFab />
-
-      <main className="mx-auto max-w-2xl px-6 py-20">
+    <PageShell>
+      <div className="mx-auto max-w-2xl px-6 py-20">
         <header className="text-center">
           <p className="eyebrow font-body" dir="ltr">
             {t.booking.eyebrow}
@@ -241,9 +236,7 @@ export default function BookingPage() {
         <Suspense fallback={<BookingSkeleton />}>
           <BookingFlow />
         </Suspense>
-      </main>
-
-      <Footer />
-    </>
+      </div>
+    </PageShell>
   );
 }

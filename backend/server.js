@@ -26,21 +26,34 @@ const REQUIRED_ENV = [
 const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
 if (missing.length) {
   console.error(
-    `\nMissing environment variables in backend/.env:\n  ${missing.join("\n  ")}\n\n` +
-      `Copy .env.example to .env and fill these in before starting the server.\n`
+    `\nMissing environment variables:\n  ${missing.join("\n  ")}\n\n` +
+      `Locally: copy .env.example to .env. On Vercel: Project Settings > Environment Variables.\n`
   );
-  process.exit(1);
+  if (require.main === module) process.exit(1);
 }
 
 const app = express();
 
 app.set("trust proxy", 1); // needed for correct IPs behind Vercel/Render
 
+const ALLOWED_ORIGINS = (process.env.CLIENT_ORIGIN || "http://localhost:3000")
+  .split(",")
+  .map((o) => o.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: (process.env.CLIENT_ORIGIN || "http://localhost:3000")
-      .split(",")
-      .map((o) => o.trim()),
+    origin(origin, cb) {
+      // No Origin header: curl, health checks, server-to-server. Allow.
+      if (!origin) return cb(null, true);
+      if (ALLOWED_ORIGINS.includes(origin.replace(/\/$/, ""))) return cb(null, true);
+      // A blocked origin is silent in the browser and looks like an outage —
+      // log it so the cause is visible in the platform logs.
+      console.warn(
+        `CORS blocked ${origin}. Add it to CLIENT_ORIGIN (currently: ${ALLOWED_ORIGINS.join(", ") || "unset"})`
+      );
+      return cb(null, false);
+    },
   })
 );
 app.use(express.json());

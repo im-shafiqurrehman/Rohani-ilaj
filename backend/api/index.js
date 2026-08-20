@@ -1,8 +1,14 @@
 const { app, ready } = require("../server");
 
 module.exports = async (req, res) => {
-  // Connects on the first invocation of a cold container and reuses the
-  // connection afterwards; see config/db.js.
-  await ready();
+  try {
+    // Connects on the first invocation of a cold container, reused after.
+    await ready();
+  } catch (err) {
+    console.error("Startup failed:", err.message);
+    return res
+      .status(503)
+      .json({ error: "Service unavailable. Check server configuration." });
+  }
   return app(req, res);
 };
