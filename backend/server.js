@@ -36,21 +36,33 @@ const app = express();
 
 app.set("trust proxy", 1); // needed for correct IPs behind Vercel/Render
 
-const ALLOWED_ORIGINS = (process.env.CLIENT_ORIGIN || "http://localhost:3000")
-  .split(",")
-  .map((o) => o.trim().replace(/\/$/, ""))
-  .filter(Boolean);
+// Known origins, hard-coded so a deploy works without any env var being set.
+// CLIENT_ORIGIN still adds to this for preview URLs or a future custom domain.
+const KNOWN_ORIGINS = [
+  "https://rohaniilajcenter.vercel.app",
+  "http://localhost:3000",
+];
+
+const normalise = (o) => o.trim().replace(/\/+$/, "");
+
+const ALLOWED_ORIGINS = [
+  ...new Set(
+    [...KNOWN_ORIGINS, ...(process.env.CLIENT_ORIGIN || "").split(",")]
+      .map(normalise)
+      .filter(Boolean)
+  ),
+];
 
 app.use(
   cors({
     origin(origin, cb) {
       // No Origin header: curl, health checks, server-to-server. Allow.
       if (!origin) return cb(null, true);
-      if (ALLOWED_ORIGINS.includes(origin.replace(/\/$/, ""))) return cb(null, true);
+      if (ALLOWED_ORIGINS.includes(normalise(origin))) return cb(null, true);
       // A blocked origin is silent in the browser and looks like an outage —
       // log it so the cause is visible in the platform logs.
       console.warn(
-        `CORS blocked ${origin}. Add it to CLIENT_ORIGIN (currently: ${ALLOWED_ORIGINS.join(", ") || "unset"})`
+        `CORS blocked ${origin}. Allowed: ${ALLOWED_ORIGINS.join(", ")}`
       );
       return cb(null, false);
     },
