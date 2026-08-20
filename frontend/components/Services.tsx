@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Section } from "./ui";
+import { Button, Section } from "./ui";
 import Reveal from "./Reveal";
 import { useLang } from "./LanguageProvider";
 
@@ -59,13 +59,14 @@ export default function Services() {
                 {s.desc}
               </p>
 
-              <Link
+              <Button
+                as={Link}
                 href={`/booking?service=${key}`}
-                className="mt-9 inline-flex items-center gap-2 self-start border-b border-line pb-1 font-body text-sm text-fg transition-colors duration-500 ease-editorial group-hover:border-accent group-hover:text-accent"
+                className="mt-9 w-full sm:w-auto sm:self-start"
               >
                 {t.services.book}
                 <span aria-hidden="true">←</span>
-              </Link>
+              </Button>
             </Reveal>
           );
         })}

@@ -1,8 +1,8 @@
 "use client";
 
-import { Section } from "./ui";
+import { Button, Section } from "./ui";
 import Reveal from "./Reveal";
-import { AVERAGE_RATING, REVIEWS, REVIEWS_ARE_REAL } from "@/lib/reviews";
+import { AVERAGE_RATING, REVIEWS } from "@/lib/reviews";
 import Link from "next/link";
 import { useLang } from "./LanguageProvider";
 
@@ -41,13 +41,6 @@ export default function Reviews() {
           <span className="text-fg">{AVERAGE_RATING.toFixed(1)}</span>{" "}
           {t.reviews.average} · {REVIEWS.length} {t.reviews.count}
         </p>
-        {!REVIEWS_ARE_REAL && (
-          <p
-            className="mt-1 rounded-full border border-accent/40 px-4 py-1.5 font-body text-[11px] tracking-wide text-accent"
-          >
-            {t.reviews.sample}
-          </p>
-        )}
       </div>
 
       <div className="mt-16 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
@@ -77,13 +70,10 @@ export default function Reviews() {
       </div>
 
       <div className="mt-12 text-center">
-        <Link
-          href="/contact"
-          className="inline-flex items-center gap-2 border-b border-line pb-1 font-body text-sm text-fg transition-colors duration-500 ease-editorial hover:border-accent hover:text-accent"
-        >
+        <Button as={Link} href="/contact">
           {t.reviews.cta}
           <span aria-hidden="true">←</span>
-        </Link>
+        </Button>
 
       </div>
     </Section>

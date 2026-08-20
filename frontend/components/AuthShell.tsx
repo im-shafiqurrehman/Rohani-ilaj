@@ -36,7 +36,7 @@ export default function AuthShell({
         <Link
           href="/"
           className="flex items-center justify-center gap-3"
-          aria-label="Rohani Ilaj Center — home"
+          aria-label="Rohani Ilaj Center home"
           dir="ltr"
         >
           <Image

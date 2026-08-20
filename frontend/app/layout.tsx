@@ -3,6 +3,8 @@ import { Noto_Nastaliq_Urdu, Cormorant_Garamond, Inter } from "next/font/google"
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
+import JsonLd from "@/components/JsonLd";
+import { localBusinessJsonLd, websiteJsonLd, SITE_URL } from "@/lib/seo";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { DEFAULT_LANG, dirFor } from "@/lib/i18n";
 import {
@@ -37,11 +39,24 @@ const inter = Inter({
 
 const SITE_NAME = "Rohani Ilaj Center | روحانی علاج سنٹر";
 const DESCRIPTION =
-  "قرآن و سنت کی روشنی میں روحانی رہنمائی — جادو، جنات، نظرِ بد اور حسد کا شرعی علاج۔ لاہور۔";
+  "قرآن و سنت کی روشنی میں روحانی رہنمائی۔ جادو، جنات، نظرِ بد اور حسد کا شرعی علاج۔ لاہور۔";
 
 export const metadata: Metadata = {
+  // Makes every relative URL below resolve absolutely, which OG and canonical
+  // tags require.
+  metadataBase: new URL(SITE_URL),
   title: { default: SITE_NAME, template: `%s | Rohani Ilaj Center` },
   description: DESCRIPTION,
+  applicationName: "Rohani Ilaj Center",
+  authors: [{ name: "Rohani Ilaj Center" }],
+  creator: "Rohani Ilaj Center",
+  publisher: "Rohani Ilaj Center",
+  alternates: {
+    canonical: "/",
+    languages: { "ur-PK": "/", "en-PK": "/" },
+  },
+  category: "Spiritual guidance",
+  formatDetection: { telephone: true, address: true, email: true },
   keywords: [
     "روحانی علاج",
     "جادو کا علاج",
@@ -54,10 +69,37 @@ export const metadata: Metadata = {
   openGraph: {
     title: SITE_NAME,
     description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "Rohani Ilaj Center",
     locale: "ur_PK",
+    alternateLocale: ["en_PK"],
     type: "website",
+    images: [
+      {
+        url: "/asset/logo-full.png",
+        width: 887,
+        height: 825,
+        alt: "Rohani Ilaj Center",
+      },
+    ],
   },
-  robots: { index: true, follow: true },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: DESCRIPTION,
+    images: ["/asset/logo-full.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   icons: { icon: "/asset/logo-mark.png", apple: "/asset/logo-mark.png" },
 };
 
@@ -115,6 +157,7 @@ export default function RootLayout({
             rendered so colours are correct on the very first paint. */}
         <style dangerouslySetInnerHTML={{ __html: paletteCss() }} />
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH }} />
+        <JsonLd data={[localBusinessJsonLd(), websiteJsonLd()]} />
       </head>
       <body
         className={`${nastaliq.variable} ${cormorant.variable} ${inter.variable} bg-ink font-urdu text-fg antialiased`}

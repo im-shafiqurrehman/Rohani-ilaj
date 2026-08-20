@@ -16,11 +16,11 @@ export const FAQS: Record<"ur" | "en", Faq[]> = {
   },
   {
     q: "ادائیگی کے بعد کیا ہوتا ہے؟",
-    a: "آپ کی رسید کی دستی تصدیق کی جاتی ہے۔ تصدیق مکمل ہونے پر واٹس ایپ پر نشست کی مکمل تفصیلات — وقت اور رابطے کا طریقہ — بھیج دی جاتی ہیں۔ عام طور پر اس میں چند گھنٹے لگتے ہیں۔",
+    a: "آپ کی رسید کی دستی تصدیق کی جاتی ہے۔ تصدیق مکمل ہونے پر واٹس ایپ پر نشست کی مکمل تفصیلات، وقت اور رابطے کا طریقہ، بھیج دی جاتی ہیں۔ عام طور پر اس میں چند گھنٹے لگتے ہیں۔",
   },
   {
     q: "کیا بکنگ کے لیے اکاؤنٹ بنانا ضروری ہے؟",
-    a: "نہیں۔ بکنگ بغیر اکاؤنٹ کے مکمل ہو جاتی ہے۔ اکاؤنٹ بنانا اختیاری ہے — اس کا فائدہ صرف یہ ہے کہ آپ بعد میں لاگ اِن کر کے اپنی بکنگ کی صورتحال (زیرِ غور، منظور، یا مسترد) خود دیکھ سکتے ہیں۔",
+    a: "نہیں۔ بکنگ بغیر اکاؤنٹ کے مکمل ہو جاتی ہے۔ اکاؤنٹ بنانا اختیاری ہے، اس کا فائدہ صرف یہ ہے کہ آپ بعد میں لاگ اِن کر کے اپنی بکنگ کی صورتحال (زیرِ غور، منظور، یا مسترد) خود دیکھ سکتے ہیں۔",
   },
   {
     q: "کیا میری بات چیت خفیہ رہے گی؟",
@@ -46,7 +46,7 @@ export const FAQS: Record<"ur" | "en", Faq[]> = {
     },
     {
       q: "How do I pay?",
-      a: "By card only. You transfer the fee to the bank account shown — using your mobile banking app, an ATM, or online banking — and then upload a screenshot of the receipt.",
+      a: "By card only. You transfer the fee to the bank account shown, using your mobile banking app, an ATM, or online banking, and then upload a screenshot of the receipt.",
     },
     {
       q: "What happens after I pay?",
@@ -54,7 +54,7 @@ export const FAQS: Record<"ur" | "en", Faq[]> = {
     },
     {
       q: "Do I need an account to book?",
-      a: "No. Booking works without one. An account is optional — it simply lets you sign back in later to see whether your payment is pending, approved, or rejected.",
+      a: "No. Booking works without one. An account is optional, it simply lets you sign back in later to see whether your payment is pending, approved, or rejected.",
     },
     {
       q: "Will my conversation stay private?",

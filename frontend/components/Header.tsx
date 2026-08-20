@@ -34,7 +34,7 @@ export default function Header() {
         <Link
           href="/"
           className="group flex items-center gap-3 focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
-          aria-label={`${SITE.name} — home`}
+          aria-label={`${SITE.name} home`}
         >
           <Image
             src="/asset/logo-mark.png"

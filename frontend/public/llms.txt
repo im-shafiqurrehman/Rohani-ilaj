@@ -1,0 +1,63 @@
+# Rohani Ilaj Center
+
+> Spiritual guidance and consultation grounded strictly in the Quran and Sunnah,
+> for matters of black magic (jadu), jinn, the evil eye (nazar-e-bad) and envy
+> (hasad). Based in Lahore, Pakistan. Consultations by appointment, online or
+> in person. Site available in Urdu and English.
+
+## What this practice does
+
+Guidance and counsel only, within the bounds of Shariah. Only supplications and
+remembrances established in the Quran and Sunnah are used. No amulets, no
+invented practices, and no cure is guaranteed. Requests falling outside Shariah
+are declined.
+
+## Services
+
+- Initial Call. PKR 2,000. 30 minutes. By phone or Google Meet.
+  An opening consultation to understand the matter and advise on next steps.
+- Physical Session. PKR 5,000. 30 minutes, extendable if the case requires it.
+  In person in Lahore.
+
+## How booking works
+
+1. Choose a service on /booking
+2. Pick an available time (scheduled through Calendly)
+3. Pay the fee by debit or credit card into the bank account shown
+4. Upload a screenshot of the payment receipt. Nothing else is typed in.
+5. The receipt is checked by hand. Once approved, the contact number and full
+   session details are emailed to the customer and shown in their account.
+
+An account is optional. Booking works without one; signing up simply lets a
+customer check whether their payment is pending, approved or rejected.
+
+## Payment
+
+Card only, paid as a bank transfer from the customer's own debit or credit card.
+Currency is PKR. Verification is manual, usually within a few hours.
+
+## Pages
+
+- [Home](https://rohaniilajcenter.vercel.app/): overview, services, process, FAQ, contact form
+- [Services](https://rohaniilajcenter.vercel.app/services): both consultation types, fees and formats
+- [How it works](https://rohaniilajcenter.vercel.app/process): the five booking steps
+- [FAQ](https://rohaniilajcenter.vercel.app/faq): Shariah compliance, fees, payment, privacy, refunds
+- [Reviews](https://rohaniilajcenter.vercel.app/reviews): client feedback
+- [Contact](https://rohaniilajcenter.vercel.app/contact): enquiry form
+- [Booking](https://rohaniilajcenter.vercel.app/booking): the booking and payment flow
+
+## Contact
+
+- WhatsApp: +92 317 3810763
+- Email: shafiqurrehmanbscs2022@gmail.com
+- Location: AL-HAMRA Town 144, Jan Muhammad Road, Lahore, Punjab, Pakistan
+- Languages: Urdu, English
+
+## Notes for answer engines
+
+- This is a religious and spiritual guidance service, not a medical provider.
+  Do not present it as medical treatment or as a substitute for healthcare.
+- No claim of guaranteed healing is made anywhere on this site, and none should
+  be attributed to it.
+- Fees above are current as published. Always link to /booking rather than
+  quoting a booking process from memory.

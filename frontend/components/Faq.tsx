@@ -57,7 +57,7 @@ export default function Faq() {
                 id={`faq-panel-${i}`}
                 data-open={isOpen}
                 aria-hidden={!isOpen}
-                className="collapse font-body text-sm leading-8 text-muted"
+                className="faq-answer font-body text-sm leading-8 text-muted"
               >
                 <div>
                   <p className="pb-7">{f.a}</p>

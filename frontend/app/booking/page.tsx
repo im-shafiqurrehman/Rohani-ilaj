@@ -70,7 +70,7 @@ function BookingFlow() {
                     <p className="mt-4 font-body text-xs leading-6 text-muted">
                       {`${svc.durationValue} · ${svc.note}`}
                     </p>
-                    <span className="mt-7 inline-flex items-center gap-2 border-b border-line pb-1 font-body text-sm text-fg transition-colors duration-500 group-hover:border-accent group-hover:text-accent">
+                    <span className="glow-button mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-accent px-7 py-3 font-body text-sm tracking-wide text-accent-fg transition-all duration-500 ease-editorial group-hover:brightness-110">
                       {t.booking.select} <span aria-hidden="true">←</span>
                     </span>
                   </button>

@@ -8,7 +8,6 @@ export type Review = {
   textEn: string;
 };
 
-export const REVIEWS_ARE_REAL = false;
 
 export const REVIEWS: Review[] = [
   {

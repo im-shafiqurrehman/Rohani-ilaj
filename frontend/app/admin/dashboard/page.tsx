@@ -275,7 +275,7 @@ function BookingRow({
                 ok: false,
                 text:
                   n.reason === "no-email"
-                    ? "Saved, but this booking has no email address — contact them on WhatsApp."
+                    ? "Saved, but this booking has no email address. Contact them on WhatsApp."
                     : `Saved, but the email did NOT send (${n.reason}). Contact them on WhatsApp.`,
               }
         );
@@ -357,7 +357,7 @@ function BookingRow({
             )}
             {!b.slotTime && (
               <dd className="mt-1 text-muted/70">
-                Not resolved — set the Calendly token
+                Not resolved. Set the Calendly token
               </dd>
             )}
           </div>
@@ -502,7 +502,7 @@ function BookingRow({
             disabled={busy}
             className="mt-4 border-b border-line pb-0.5 font-body text-xs text-muted transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
           >
-            {busy ? "…" : "↩ Undo — move back to pending"}
+            {busy ? "…" : "↩ Undo, move back to pending"}
           </button>
         </div>
       )}

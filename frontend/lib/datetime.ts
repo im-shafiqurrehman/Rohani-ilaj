@@ -54,5 +54,5 @@ export function formatSlotRange(
   if (!e) return `${date}, ${from} (${TIME_ZONE_LABEL})`;
 
   const to = e.toLocaleTimeString("en-US", TIME_OPTS);
-  return `${date}, ${from} – ${to} (${TIME_ZONE_LABEL})`;
+  return `${date}, ${from} to ${to} (${TIME_ZONE_LABEL})`;
 }

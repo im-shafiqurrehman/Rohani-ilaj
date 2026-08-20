@@ -52,7 +52,7 @@ async function sendContactEmail({ name, phone, email, topic, message }) {
 
   const html = `
     <div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#051740;max-width:560px">
-      <h2 style="margin:0 0 4px;color:#051740">Rohani Illaj — website form</h2>
+      <h2 style="margin:0 0 4px;color:#051740">Rohani Ilaj Center website form</h2>
       <p style="margin:0 0 16px;color:#8A6413;font-size:13px">
         Yeh paigham website ke contact form se aaya hai.
       </p>
@@ -80,7 +80,7 @@ async function sendContactEmail({ name, phone, email, topic, message }) {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: process.env.CONTACT_TO_EMAIL,
     replyTo: email || undefined,
-    subject: `[${topic}] ${name} — ${phone}`,
+    subject: `[${topic}] ${name} (${phone})`,
     text,
     html,
   });
@@ -150,8 +150,8 @@ async function sendBookingDecisionEmail(booking, { contactNumber } = {}) {
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       to: booking.customerEmail,
       subject: approved
-        ? "Booking confirmed — Rohani Ilaj Center"
-        : "Booking update — Rohani Ilaj Center",
+        ? "Booking confirmed | Rohani Ilaj Center"
+        : "Booking update | Rohani Ilaj Center",
       text,
       html,
     });
@@ -207,7 +207,7 @@ async function sendBookingReceivedEmail(booking) {
     await tx.sendMail({
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       to: booking.customerEmail,
-      subject: "Booking received — Rohani Ilaj Center",
+      subject: "Booking received | Rohani Ilaj Center",
       text:
         `Aap ki booking mil gayi hai\n\n` +
         rows.map(([k, v]) => `${k}: ${v}`).join("\n") +
@@ -245,7 +245,7 @@ async function sendNewBookingAlert(booking) {
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       to: process.env.CONTACT_TO_EMAIL,
       replyTo: booking.customerEmail || undefined,
-      subject: `New booking — ${booking.customerName} (${booking.slotReference || "no ref"})`,
+      subject: `New booking: ${booking.customerName} (${booking.slotReference || "no ref"})`,
       text: rows.map(([k, v]) => `${k}: ${v}`).join("\n"),
       html: bookingHtml(
         "New booking awaiting approval",

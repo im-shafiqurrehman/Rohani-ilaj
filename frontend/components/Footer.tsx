@@ -88,7 +88,7 @@ export default function Footer() {
             © {new Date().getFullYear()} {SITE.name}. All rights reserved.
           </p>
           <p className="font-body text-xs text-muted/70">
-            Guidance only — strictly within the bounds of Shariah.
+            Guidance offered strictly within the bounds of Shariah.
           </p>
         </div>
       </div>

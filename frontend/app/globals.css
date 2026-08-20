@@ -97,6 +97,24 @@ body {
   box-shadow: 0 0 40px rgb(var(--accent) / 0.3);
 }
 
+/* Hover lifts and brightens the halo so the primary action visibly responds
+   rather than only changing colour. */
+@media (prefers-reduced-motion: no-preference) {
+  .glow-button {
+    transform: translateY(0);
+  }
+
+  .glow-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 56px rgb(var(--accent) / 0.5), 0 8px 20px -8px rgb(var(--ink) / 0.6);
+  }
+
+  .glow-button:active {
+    transform: translateY(0);
+    box-shadow: 0 0 32px rgb(var(--accent) / 0.35);
+  }
+}
+
 [data-theme="light"] .glow-button {
   box-shadow: none;
 }
@@ -222,10 +240,12 @@ body {
   width: 100%;
 }
 
-/* FAQ answers slide open instead of appearing. grid-template-rows animates
-   from 0fr to 1fr, which is the only way to transition to an unknown height
+/* NOTE: do not name this ".collapse" — Tailwind owns that utility and applies
+   visibility: collapse, which hides the element entirely.
+   Answers slide open by animating grid-template-rows from 0fr to 1fr, the only
+   way to transition to an unknown height
    without measuring it in JS. */
-.collapse {
+.faq-answer {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1),
@@ -233,12 +253,12 @@ body {
   opacity: 0;
 }
 
-.collapse > * {
+.faq-answer > * {
   overflow: hidden;
   min-height: 0;
 }
 
-.collapse[data-open="true"] {
+.faq-answer[data-open="true"] {
   grid-template-rows: 1fr;
   opacity: 1;
 }
