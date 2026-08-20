@@ -21,7 +21,7 @@ export const SERVICES = [
     price: 2000,
     minutes: 30,
     description:
-      "An opening consultation by phone or Google Meet to understand the matter and give guidance within Shariah.",
+      "An opening consultation by phone call to understand the matter and give guidance within Shariah.",
   },
   {
     name: "Physical Session",
@@ -29,7 +29,7 @@ export const SERVICES = [
     price: 5000,
     minutes: 30,
     description:
-      "A face-to-face consultation in Lahore. The duration can be extended as the case requires.",
+      "A face-to-face consultation in Lahore covering jinn expulsion and other serious matters, handled strictly within Shariah. The duration can be extended as the case requires.",
   },
 ];
 
@@ -61,7 +61,7 @@ export function localBusinessJsonLd() {
     ...(SITE.email ? { email: SITE.email } : {}),
     priceRange: "PKR 2,000 - 5,000",
     currenciesAccepted: "PKR",
-    paymentAccepted: "Debit card, Credit card, Bank transfer",
+    paymentAccepted: "Bank transfer, JazzCash, Easypaisa, Debit card, Credit card",
     knowsLanguage: ["ur", "en"],
     sameAs: [SITE.instagram, SITE.facebook, SITE.tiktok, SITE.youtube].filter(
       Boolean
