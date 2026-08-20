@@ -1,8 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
-/* Customer accounts are optional: booking works fully signed-out. An account
- * only buys you the ability to come back later and see whether the ustad has
- * approved your payment. Kept deliberately separate from the admin token. */
 const TOKEN_KEY = "rohani_user_token";
 
 export type Role = "user" | "admin";

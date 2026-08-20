@@ -20,11 +20,7 @@ export default function AuthShell({
   lede?: string;
   children: ReactNode;
   footer?: ReactNode;
-  /** "en" switches the heading to the Latin display serif. Urdu headings keep
-   *  the inherited Nastaliq face, which Latin text must never use. */
   lang?: "ur" | "en";
-  /** Staff screens skip the customer WhatsApp button — it is a support
-   *  channel for visitors, not for whoever is signing into the admin panel. */
   staff?: boolean;
 }) {
   return (

@@ -1,7 +1,5 @@
 export type Faq = { q: string; a: string };
 
-/** Both languages live together so a question can never exist in one and
- *  silently vanish in the other. */
 export const FAQS: Record<"ur" | "en", Faq[]> = {
   ur: [
   {

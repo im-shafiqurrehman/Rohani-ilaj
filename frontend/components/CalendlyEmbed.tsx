@@ -40,7 +40,7 @@ export default function CalendlyEmbed({
     return () => window.removeEventListener("message", handleMessage);
   }, [onScheduled]);
 
-  // If the Calendly link hasn't been configured yet, say so plainly instead of
+  // Unconfigured link: say so rather than render an empty box.
   // rendering an empty box the visitor can't act on.
   if (!url) {
     return (
@@ -61,8 +61,6 @@ export default function CalendlyEmbed({
   }
 
   // Pre-fills Calendly's own name/phone fields from what the visitor already
-  // typed, and hands Calendly our palette so the iframe doesn't punch a bright
-  // white hole through the dark theme.
   const prefilled = new URL(url);
   if (name) prefilled.searchParams.set("name", name);
   if (phone) prefilled.searchParams.set("a1", phone);

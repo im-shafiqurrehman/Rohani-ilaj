@@ -1,12 +1,4 @@
 #!/usr/bin/env node
-/*
- * Sets SMTP_PASS in backend/.env safely:  npm run set:smtp-pass
- *
- * Exists because copying a Gmail App Password by hand keeps failing — Google
- * renders it as "xxxx xxxx xxxx xxxx", and selecting that by eye drops a
- * character or carries the spaces across. This strips whitespace, validates
- * the length BEFORE writing, and never echoes the value to the screen.
- */
 const fs = require("node:fs");
 const path = require("node:path");
 const readline = require("node:readline");

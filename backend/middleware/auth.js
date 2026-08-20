@@ -15,9 +15,6 @@ function verify(req) {
   }
 }
 
-/**
- * Any signed-in account.
- */
 function requireUser(req, res, next) {
   const payload = verify(req);
   if (!payload) {
@@ -27,13 +24,6 @@ function requireUser(req, res, next) {
   next();
 }
 
-/**
- * Admin-only routes.
- *
- * Authorisation is the `role` claim, not a separate token type — so promoting
- * someone in the database is all it takes to grant access, and demoting them
- * revokes it as soon as their current token expires.
- */
 function requireAdmin(req, res, next) {
   const payload = verify(req);
   if (!payload) {
@@ -47,11 +37,6 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-/**
- * Attaches req.user when a valid token is present, but never blocks. Used on
- * the public booking route so a signed-in customer's booking gets linked to
- * their account while guests still book freely.
- */
 function optionalUser(req, res, next) {
   const payload = verify(req);
   if (payload) req.user = payload;

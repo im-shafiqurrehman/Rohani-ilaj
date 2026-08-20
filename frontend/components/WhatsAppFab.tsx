@@ -3,14 +3,6 @@
 import { useLang } from "./LanguageProvider";
 import { CONTACT_LINK, WHATSAPP_LINK } from "@/lib/site";
 
-/**
- * Always-visible escape hatch. Someone who can't finish the booking form —
- * or who simply wants to ask before paying — should reach a human in one tap
- * rather than abandoning the site.
- *
- * Falls back to the on-site form if no number is configured, so this never
- * renders a dead wa.me/ link.
- */
 export default function WhatsAppFab() {
   const { t } = useLang();
   const isWhatsApp = Boolean(WHATSAPP_LINK);

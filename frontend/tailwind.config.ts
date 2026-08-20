@@ -1,11 +1,5 @@
 import type { Config } from "tailwindcss";
 
-/*
- * Colours resolve through CSS variables (see app/globals.css) so the same
- * class works in both themes — `bg-surface` is dark navy on the dark theme
- * and near-white on the light one, with no dark: variants scattered through
- * the components.
- */
 const token = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
 
 const config: Config = {

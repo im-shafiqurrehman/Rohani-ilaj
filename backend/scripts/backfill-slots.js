@@ -1,12 +1,4 @@
 #!/usr/bin/env node
-/*
- * Fills in slot details for bookings taken before the Calendly tokens were
- * live:  npm run backfill:slots
- *
- * Node reads process.env once at startup, so adding a token to .env does
- * nothing until the server restarts — any booking made in between stored an
- * event URI but no times. This resolves those retroactively.
- */
 require("dotenv").config();
 const mongoose = require("mongoose");
 const Booking = require("../models/Booking");

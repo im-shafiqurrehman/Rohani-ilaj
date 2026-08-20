@@ -25,11 +25,6 @@ function publicUser(user) {
   };
 }
 
-/**
- * Any guest bookings already placed with this phone number get attached to
- * the new account, so someone who booked first and signed up afterwards
- * still sees their history. This is why phone is the account identity.
- */
 async function claimGuestBookings(user) {
   await Booking.updateMany(
     { customerPhone: user.phone, user: { $exists: false } },
@@ -52,12 +47,6 @@ async function signup(req, res) {
     return res.status(400).json({ error: "Password kam az kam 6 characters ka ho." });
   }
   // Required. Booking updates and the post-approval contact number are both
-  // delivered by email, so an account with no address cannot be notified.
-  //
-  // Enforced here rather than on the schema on purpose: the seeded admin and
-  // any account created before this change have no email, and a required
-  // field would make .save() fail on those existing documents — including the
-  // promote-to-admin path in server.js.
   const cleanEmail = String(email || "").trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
     return res
@@ -79,6 +68,7 @@ async function signup(req, res) {
     phone: normalised,
     email: cleanEmail,
     passwordHash: await bcrypt.hash(String(password), 10),
+    // Never read role from req.body — that would let anyone self-promote.
     role: "user",
   });
 
@@ -131,8 +121,6 @@ async function myBookings(req, res) {
     .lean();
 
   // The contact number is attached per row, and only where the payment has
-  // actually been approved. Gating it in the UI alone would be meaningless —
-  // the value would still be sitting in the API response for anyone to read.
   const contactNumber = process.env.SESSION_CONTACT_NUMBER || "";
 
   return res.json(

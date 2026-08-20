@@ -6,11 +6,6 @@ const { normalisePhone } = require("../utils/phone");
 const { sendBookingDecisionEmail } = require("../utils/mailer");
 
 // POST /api/admin/login   body: { phone, password }
-//
-// Same credentials as the customer login — the only extra condition is that
-// the account carries role "admin". Kept as its own endpoint so a non-admin
-// gets a clear message instead of a token that silently fails on every
-// subsequent admin request.
 async function login(req, res) {
   const { phone, password } = req.body || {};
   const normalised = normalisePhone(phone);
@@ -57,8 +52,6 @@ async function listBookings(req, res) {
     const safe = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const rx = new RegExp(safe, "i");
     // transactionId / accountTitle are no longer collected, but older
-    // bookings still carry them — keep them searchable so history stays
-    // reachable by the reference a customer may still quote.
     filter.$or = [
       { customerName: rx },
       { customerPhone: rx },
@@ -129,8 +122,6 @@ async function updateBookingStatus(req, res) {
   update.adminNote = status === "pending" ? "" : adminNote;
 
   // Read the current status first so we only notify on an actual CHANGE.
-  // Re-approving an already-approved booking would otherwise email the
-  // customer a second time saying the same thing.
   const before = await Booking.findById(req.params.id).select("status").lean();
   if (!before) {
     return res.status(404).json({ error: "Booking nahi mili." });
@@ -147,8 +138,6 @@ async function updateBookingStatus(req, res) {
   const statusChanged = before.status !== status;
 
   // Notify the customer. Deliberately awaited but never allowed to fail the
-  // request: the decision is already saved, so a mail problem must surface as
-  // information, not as a failed approval the ustad would try again.
   let notified = { sent: false, reason: "unchanged" };
   if (status !== "pending" && statusChanged) {
     notified = await sendBookingDecisionEmail(booking, {

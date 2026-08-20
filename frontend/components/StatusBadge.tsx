@@ -19,11 +19,6 @@ const STATUS = {
 
 export type BookingStatus = keyof typeof STATUS;
 
-/**
- * Approved/rejected keep a green/red read because they're a verification
- * result, not decoration — this is the one place the palette makes room for
- * semantic colour, and it's what the ustad scans for.
- */
 export default function StatusBadge({
   status,
   force,

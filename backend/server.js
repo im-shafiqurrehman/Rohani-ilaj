@@ -91,13 +91,11 @@ app.use("/api/admin", adminRoutes);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
-// Catches multer/Cloudinary upload failures so the frontend gets clean JSON
-// instead of an HTML error page it can't parse.
 app.use((err, req, res, next) => {
   if (err && err.code === "LIMIT_FILE_SIZE") {
     return res
       .status(400)
-      .json({ error: "Screenshot bohat bari hai. 5MB se kam file bhejein." });
+      .json({ error: "Screenshot bohat bari hai. 2MB se kam file bhejein." });
   }
   if (err) {
     console.error(err);
@@ -108,17 +106,6 @@ app.use((err, req, res, next) => {
   next();
 });
 
-// Creates the single admin account from .env the first time the server runs,
-// so there's no separate "sign up" flow for the admin panel.
-/*
- * Guarantees exactly one admin account exists, identified by ADMIN_PHONE.
- *
- * Three cases, because the ustad may well have signed up as a normal customer
- * with the same number before this ran:
- *   - no account      -> create one with role "admin"
- *   - account, role user -> promote it, leaving their bookings intact
- *   - already admin   -> leave the password alone (it may have been rotated)
- */
 async function seedAdmin() {
   const phone = normalisePhone(process.env.ADMIN_PHONE);
   if (!phone) {
@@ -146,9 +133,27 @@ async function seedAdmin() {
   }
 }
 
-const PORT = process.env.PORT || 5000;
+let readyPromise = null;
 
-connectDB().then(async () => {
-  await seedAdmin();
-  app.listen(PORT, () => console.log(`API running on port ${PORT}`));
-});
+function ready() {
+  if (!readyPromise) {
+    readyPromise = connectDB()
+      .then(() => seedAdmin())
+      .catch((err) => {
+        // Let the next request retry rather than caching a failed boot.
+        readyPromise = null;
+        throw err;
+      });
+  }
+  return readyPromise;
+}
+
+// Only listen when run as a real process (`npm start`, Render, Railway, local
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  ready().then(() => {
+    app.listen(PORT, () => console.log(`API running on port ${PORT}`));
+  });
+}
+
+module.exports = { app, ready };

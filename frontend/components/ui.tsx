@@ -1,15 +1,6 @@
 import { ReactNode } from "react";
 import Reveal from "./Reveal";
 
-/*
- * The editorial kit. Every surface on the site is built from these four
- * pieces so spacing, rules, and the gold budget stay consistent:
- *   Section — vertical rhythm + the eyebrow/title/lede block
- *   Panel   — a hairline-bordered surface, never a drop-shadowed "card"
- *   Button  — exactly one gold fill per view; everything else is outline
- *   Field   — form input with a hairline underline rather than a box
- */
-
 export function Section({
   id,
   eyebrow,

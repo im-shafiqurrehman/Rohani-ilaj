@@ -1,12 +1,5 @@
 const mongoose = require("mongoose");
 
-/*
- * Mongoose creates indexes declared on a schema but never drops ones that were
- * removed from it. The old form made transactionId unique; now that the field
- * is optional, that leftover index would reject the SECOND booking that omits
- * it — MongoDB treats a missing value as null, and null collides with null
- * under a non-sparse unique index. So it has to be dropped explicitly, once.
- */
 async function dropStaleIndexes() {
   const stale = [{ collection: "bookings", index: "transactionId_1" }];
 
@@ -32,19 +25,19 @@ const BASE_DELAY_MS = 2000;
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/*
- * Retries the initial connection before giving up.
- *
- * This used to exit(1) on the first failure, which turned a momentary DNS
- * hiccup — a single EREFUSED on the Atlas SRV lookup — into a backend that
- * stayed down indefinitely: nodemon does not restart a process that exited
- * cleanly, it waits for a file change. Meanwhile every request from the
- * browser fails with a bare "Failed to fetch".
- *
- * Once connected, mongoose handles reconnection itself; this only covers
- * startup.
- */
+const cache = globalThis.__mongooseConn || (globalThis.__mongooseConn = { promise: null });
+
 async function connectDB() {
+  if (mongoose.connection.readyState === 1) return;
+  if (cache.promise) return cache.promise;
+  cache.promise = doConnect().catch((err) => {
+    cache.promise = null;
+    throw err;
+  });
+  return cache.promise;
+}
+
+async function doConnect() {
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       await mongoose.connect(process.env.MONGO_URI, {

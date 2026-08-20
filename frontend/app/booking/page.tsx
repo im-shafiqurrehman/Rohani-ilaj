@@ -203,8 +203,6 @@ function ContactStep({
   );
 }
 
-/* Matches the height of the step indicator + first step so the page doesn't
-   jump when the client-rendered flow replaces it. */
 function BookingSkeleton() {
   const { t } = useLang();
 

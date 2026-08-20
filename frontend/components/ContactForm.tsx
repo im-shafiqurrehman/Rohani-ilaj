@@ -10,11 +10,6 @@ import { useLang } from "./LanguageProvider";
 
 const TOPIC_KEYS: ContactTopic[] = ["sawal", "booking", "tassur", "deegar"];
 
-/**
- * The one general-purpose form on the site. Everything sent here is emailed
- * straight to the business inbox, so questions, booking problems, and client
- * feedback arrive in one place without exposing a personal phone number.
- */
 export default function ContactForm() {
   const { t } = useLang();
   const [topic, setTopic] = useState<ContactTopic>("sawal");

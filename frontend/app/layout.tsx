@@ -67,10 +67,6 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-/*
- * Runs before first paint so a light-theme visitor never sees a dark flash.
- * Kept as a raw string because it must be inline and synchronous.
- */
 const NO_FLASH = `
 (function(){
   var el = document.documentElement;

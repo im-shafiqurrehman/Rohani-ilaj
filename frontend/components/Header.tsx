@@ -9,11 +9,6 @@ import LanguageToggle from "./LanguageToggle";
 import { useAuth } from "./AuthProvider";
 import { NAV, SITE } from "@/lib/site";
 
-/*
- * English chrome over Urdu content, per the brief. The header is dir="ltr"
- * inside the RTL document so the logo sits left and the actions sit right,
- * the way an English navigation is read.
- */
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);

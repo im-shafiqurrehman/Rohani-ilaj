@@ -17,10 +17,12 @@ const storage = new CloudinaryStorage({
   },
 });
 
-// Limits: single file, 5MB max - a phone screenshot is well under this
+// Single file, 2MB max — kept in step with MAX_UPLOAD_MB in
+const MAX_UPLOAD_MB = 2;
+
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 },
 });
 
 module.exports = { upload };

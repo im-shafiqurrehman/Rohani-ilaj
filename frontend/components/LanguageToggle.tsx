@@ -5,11 +5,6 @@ import { LANGS, Lang } from "@/lib/i18n";
 
 const LABEL: Record<Lang, string> = { ur: "اردو", en: "EN" };
 
-/**
- * Two-state segmented switch rather than a dropdown: with only two languages
- * a menu costs an extra click and hides the option you want. Both labels are
- * written in their own script, so each is legible to the person who needs it.
- */
 export default function LanguageToggle() {
   const { lang, setLang } = useLang();
 

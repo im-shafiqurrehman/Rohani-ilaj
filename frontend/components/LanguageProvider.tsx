@@ -26,8 +26,6 @@ export const useLang = () => useContext(LanguageContext);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   // The pre-paint script has already set lang/dir on <html>, so read from the
-  // DOM rather than guessing and re-flashing the whole page in the wrong
-  // direction.
   const [lang, setLangState] = useState<Lang>(DEFAULT_LANG);
 
   useEffect(() => {

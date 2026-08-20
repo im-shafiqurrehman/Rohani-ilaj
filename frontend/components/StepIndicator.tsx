@@ -2,11 +2,6 @@
 
 import { useLang } from "./LanguageProvider";
 
-/**
- * A visible "you are here" bar. This audience is often not comfortable with
- * multi-step web forms, so the number of remaining steps stays on screen
- * rather than being implied.
- */
 export default function StepIndicator({
   current,
   labels,

@@ -1,11 +1,4 @@
 #!/usr/bin/env node
-/*
- * Email smoke test:  npm run test:email  [recipient@example.com]
- *
- * Runs the three stages separately so a failure tells you WHICH thing is
- * wrong — missing config, bad credentials, or a broken template — rather than
- * one opaque "email didn't work".
- */
 require("dotenv").config();
 const { verifyConnection, sendBookingDecisionEmail, isConfigured } = require("../utils/mailer");
 
@@ -21,9 +14,6 @@ const REQUIRED = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "CONTACT_T
   }
 
   // Gmail App Passwords are the single most common setup failure: Google
-  // DISPLAYS them as "xxxx xxxx xxxx xxxx", and pasting that verbatim (or
-  // dropping a character while selecting it) produces an opaque 535 error.
-  // Check the shape locally so the problem is named, not guessed at.
   if (/gmail|google/i.test(process.env.SMTP_HOST || "")) {
     const raw = process.env.SMTP_PASS || "";
     const stripped = raw.replace(/\s/g, "");

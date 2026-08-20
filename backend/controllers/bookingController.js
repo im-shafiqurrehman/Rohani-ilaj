@@ -30,9 +30,7 @@ async function createBooking(req, res) {
     if (!customerName || !customerPhone) {
       return res.status(400).json({ error: "Naam aur phone number zaroori hain." });
     }
-    // A `required` attribute in the browser is trivially bypassed, so the
-    // real gate is here — without a deliverable address the confirmation and
-    // the post-approval contact number have nowhere to go.
+    // Browser `required` is bypassable; this is the real gate.
     const email = String(customerEmail || "").trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res
@@ -53,10 +51,6 @@ async function createBooking(req, res) {
     }
 
     // Cloudinary reports an MD5 of the stored file as `etag`. When the storage
-    // driver surfaces it, use it to stop the exact same receipt image being
-    // submitted for two different bookings — the job the transaction ID used
-    // to do. Different receipts for the same amount hash differently, so this
-    // only catches a literal re-upload.
     const etag = req.file.etag || null;
     if (etag) {
       const reused = await Booking.findOne({ screenshotEtag: etag });
@@ -82,8 +76,6 @@ async function createBooking(req, res) {
     }
 
     // Resolve the actual booked slot. Never fatal — a failed lookup leaves the
-    // slot fields empty and the admin can still work from the receipt.
-    // serviceType selects which Calendly account's token to use.
     const slot = await fetchScheduledEvent(calendlyEventUri, serviceType);
 
     const booking = await Booking.create({
@@ -97,7 +89,7 @@ async function createBooking(req, res) {
       slotReference: slotReference(calendlyEventUri),
       calendlyEventName: slot?.eventName,
       calendlyEventUri,
-      // Calendly generates the meeting link itself, so pre-fill it rather than
+      // Calendly generates the meeting link; pre-fill it.
       // making the ustad create and paste one at approval time.
       meetLink: slot?.joinUrl || undefined,
       accountTitle: thirdParty ? String(accountTitle).trim() : undefined,
@@ -112,13 +104,6 @@ async function createBooking(req, res) {
     });
 
     // The CUSTOMER gets exactly one email, and only once the payment has been
-    // approved (see adminController). No acknowledgement is sent at submission
-    // time — the on-screen confirmation already covers that, and a second
-    // message before anything is decided is just noise.
-    //
-    // This alert goes to the practitioner, not the customer, so that a booking
-    // waiting for review doesn't depend on someone remembering to open the
-    // dashboard. Set NOTIFY_ADMIN_ON_BOOKING=false to switch it off.
     if (process.env.NOTIFY_ADMIN_ON_BOOKING !== "false") {
       // Fired, not awaited: an SMTP round trip is 1-2s and the customer should
       // not wait on it. A booking must never fail because email did.

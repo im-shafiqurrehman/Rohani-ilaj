@@ -14,7 +14,6 @@ import { useLang } from "@/components/LanguageProvider";
 import WhatsAppFab from "@/components/WhatsAppFab";
 import { formatDateTime, formatSlotRange } from "@/lib/datetime";
 
-
 export default function AccountPage() {
   const router = useRouter();
   const { user, loading, signOut } = useAuth();

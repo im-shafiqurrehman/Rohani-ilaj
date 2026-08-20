@@ -28,7 +28,6 @@ const TABS = [
   { value: "", label: "All" },
 ] as const;
 
-
 export default function AdminDashboard() {
   const router = useRouter();
   const { user, loading: authLoading, signOut } = useAuth();
@@ -40,8 +39,6 @@ export default function AdminDashboard() {
   const [error, setError] = useState("");
   const [loadingMore, setLoadingMore] = useState(false);
 
-  /** Reloads from the top. Also used after an approve/reject so the row moves
-   *  into the right tab immediately. */
   const load = useCallback(async () => {
     try {
       const [page, s] = await Promise.all([
@@ -75,8 +72,6 @@ export default function AdminDashboard() {
   }, [bookings, tab, query]);
 
   // One effect owns fetching. Previously a mount effect and a debounce effect
-  // both called load(), firing two requests per tab change — and the debounced
-  // one still fired after the no-token redirect.
   useEffect(() => {
     if (authLoading) return;
     // A token alone is no longer enough — a signed-in customer must not reach
@@ -271,8 +266,6 @@ function BookingRow({
       setConfirmingReject(false);
 
       // Surface whether the customer was actually emailed. Approving without
-      // telling them is worse than not approving yet — they have paid and are
-      // waiting, and a failure here is otherwise invisible.
       const n = updated.notified;
       if (status !== "pending" && n) {
         setNotice(

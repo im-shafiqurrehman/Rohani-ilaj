@@ -9,17 +9,6 @@ import { useAuth } from "@/components/AuthProvider";
 import { login } from "@/lib/auth";
 import { useLang } from "@/components/LanguageProvider";
 
-/**
- * Reads ?next= without useSearchParams.
- *
- * useSearchParams() forces the whole route out of pre-rendering, which left
- * this page server-rendering to an empty body — a blank white screen until JS
- * arrived. The redirect target is only needed at submit time, so reading it
- * from location directly keeps the page statically rendered.
- *
- * Only same-origin relative paths are honoured, so a crafted
- * ?next=https://evil.example can't turn the login into an open redirect.
- */
 function safeNextUrl() {
   if (typeof window === "undefined") return "/account";
   const raw = new URLSearchParams(window.location.search).get("next");

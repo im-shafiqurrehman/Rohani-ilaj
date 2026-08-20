@@ -3,11 +3,6 @@
 import { useState } from "react";
 import { useLang } from "./LanguageProvider";
 
-/**
- * Shows a payment detail (account number / IBAN / title) with a copy button.
- * Retyping an account number is the most common way a payment ends up in the
- * wrong account, so copying is the default action rather than an extra.
- */
 export default function CopyField({
   label,
   value,

@@ -1,12 +1,3 @@
-/*
- * One place that formats dates, so the admin panel, the customer's account
- * page and the approval email can never disagree about what time a session is.
- *
- * Times are pinned to Pakistan rather than the viewer's own timezone. The
- * sessions happen in Lahore, so a customer travelling — or a browser with a
- * misconfigured clock — should still see the time the practitioner means.
- * The zone is labelled so there is no ambiguity.
- */
 export const TIME_ZONE = "Asia/Karachi";
 export const TIME_ZONE_LABEL = "PKT";
 
@@ -49,12 +40,6 @@ export function formatDateTime(value?: string | Date | null) {
   return `${d.toLocaleDateString("en-GB", DATE_OPTS)}, ${d.toLocaleTimeString("en-US", TIME_OPTS)}`;
 }
 
-/**
- * "20 Aug 2026, 11:00 PM – 11:30 PM (PKT)"
- *
- * Falls back to just the start when the end is unknown — some bookings
- * predate the Calendly lookup that supplies it.
- */
 export function formatSlotRange(
   start?: string | Date | null,
   end?: string | Date | null

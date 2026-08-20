@@ -2,11 +2,6 @@ import Image from "next/image";
 import { resolveBanner } from "@/lib/banner";
 import HeroCopy from "./HeroCopy";
 
-/*
- * The logo lives in the header now, not here. This section is the banner (once
- * one is supplied) with the Urdu headline set over it; until then it degrades
- * to a type-only editorial hero rather than an empty frame.
- */
 export default function Hero() {
   const banner = resolveBanner();
 

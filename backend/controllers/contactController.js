@@ -9,8 +9,6 @@ const TOPICS = {
   deegar: "Deegar",
 };
 
-/** The site publishes no phone number until a payment is approved, so the
- *  only honest fallback when the form itself is down is the public email. */
 function fallbackContact() {
   return process.env.PUBLIC_CONTACT_EMAIL || process.env.CONTACT_TO_EMAIL || "";
 }

@@ -2,13 +2,6 @@
 
 import { useEffect, useRef } from "react";
 
-/**
- * Hairline reading-progress bar across the top of the page.
- *
- * Writes the width straight to the DOM node inside a rAF instead of going
- * through React state — a scroll handler that calls setState on every frame
- * would re-render the tree ~60 times a second for a cosmetic bar.
- */
 export default function ScrollProgress() {
   const ref = useRef<HTMLDivElement>(null);
 

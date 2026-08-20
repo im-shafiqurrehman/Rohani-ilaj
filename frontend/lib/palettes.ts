@@ -1,28 +1,3 @@
-/*
- * ── Colour palettes ─────────────────────────────────────────────────────
- * Single source of truth for every theme. The CSS custom properties the whole
- * site paints with are generated from this file (see paletteCss below and the
- * <style> block in app/layout.tsx), so the swatches in the picker and the
- * actual rendered colours can never drift apart.
- *
- * TO SWAP IN A PALETTE FROM COOLORS: replace the hex values below. Nothing
- * else needs to change — no component references a colour directly.
- *
- * RULES THIS SET FOLLOWS:
- *   1. No black, and nothing near it. The darkest ink here is #0B2149 — a
- *      saturated blue (81-85% saturation), not a blue-tinted black. Compare
- *      the old #0A0E1A, which measured 62% saturation but read as charcoal
- *      because its blue channel was only 26/255.
- *   2. Light mode is blue-tinted paper, not white, and its text is deep navy,
- *      never #000.
- *   3. Surfaces step UP in lightness from the ink, so panels lift off the
- *      page instead of being outlined onto it.
- *
- * Every combination is checked for WCAG AA:
- *   fg/ink ≥ 11:1 · muted/ink ≥ 4.6:1 · accent on ink AND surface ≥ 4.5:1
- * If you paste new hexes, re-check them — a trending palette is chosen to look
- * good as five swatches in a row, not to be legible as body text.
- */
 
 export type Tokens = {
   ink: string;
@@ -32,9 +7,6 @@ export type Tokens = {
   fg: string;
   muted: string;
   accent: string;
-  /** Light stop of the accent gradient used by the glowing display type.
-   *  On light themes this equals `accent`, because the gradient is suppressed
-   *  there — neon on white paper is unreadable. */
   accent2: string;
   accentFg: string;
   danger: string;
@@ -55,7 +27,7 @@ export const PALETTES: Palette[] = [
     name: "Midnight Cyan",
     swatch: "#28BCF6",
     dark: {
-      // Lifted verbatim from shafiqurrehman.vercel.app's :root — the same
+      // Lifted from shafiqurrehman.vercel.app's :root.
       // hsl(222 47% …) ramp and the hsl(197 92% 56%) cyan primary.
       ink: "#05080F",
       surface: "#080C16",
@@ -70,8 +42,6 @@ export const PALETTES: Palette[] = [
     },
     light: {
       // No light mode exists on the portfolio, so this is the same hue family
-      // inverted: blue-grey paper, white cards, and a cyan darkened until it
-      // passes AA (the #28BCF6 primary scores only 2.1:1 on white).
       ink: "#F6F9FC",
       surface: "#FFFFFF",
       surface2: "#EAF2F9",
@@ -234,8 +204,6 @@ export const PALETTES: Palette[] = [
 export const DEFAULT_PALETTE = "terminal";
 export const PALETTE_IDS = PALETTES.map((p) => p.id);
 
-/** "#0A0E1A" -> "10 14 26", the space-separated form Tailwind's
- *  `rgb(var(--x) / <alpha-value>)` needs for opacity modifiers to work. */
 function rgb(hex: string) {
   const h = hex.replace("#", "");
   return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)).join(" ");
@@ -249,11 +217,6 @@ function block(selector: string, t: Tokens, scheme: "dark" | "light") {
   )};--accent-2:${rgb(t.accent2)};--accent-fg:${rgb(t.accentFg)};--danger:${rgb(t.danger)};color-scheme:${scheme};}`;
 }
 
-/**
- * The full theme stylesheet. Rendered once, server-side, into <head> so the
- * colours are present on the very first paint — the inline no-flash script
- * only has to set two attributes.
- */
 export function paletteCss() {
   const fallback = PALETTES.find((p) => p.id === DEFAULT_PALETTE) ?? PALETTES[0];
 
@@ -267,8 +230,6 @@ export function paletteCss() {
   ].join("");
 }
 
-/** The portfolio's signature cyan gradient, used on the primary button and
- *  the display headings. Falls back to a flat accent for other palettes. */
 export const ACCENT_GRADIENT: Record<string, string> = {
   terminal: "linear-gradient(135deg, #28BCF6 0%, #66FFFF 100%)",
 };

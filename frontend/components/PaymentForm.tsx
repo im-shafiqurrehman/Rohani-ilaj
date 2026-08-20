@@ -3,18 +3,13 @@
 import Link from "next/link";
 import { useState, FormEvent } from "react";
 import { submitBooking } from "@/lib/api";
+import { compressImage, MAX_UPLOAD_BYTES, MAX_UPLOAD_MB } from "@/lib/upload";
 import { useAuth } from "./AuthProvider";
 import { useLang } from "./LanguageProvider";
 import CopyField from "./CopyField";
 import { Field, Button, Alert } from "./ui";
 import { CONTACT_LINK } from "@/lib/site";
 
-/*
- * Card is the only payment method on offer. The customer pays from their own
- * debit/credit card into the business bank account below, then uploads the
- * receipt for manual review — no card gateway is available to this business
- * yet, so verification stays human.
- */
 const BANK = {
   name: process.env.NEXT_PUBLIC_BANK_NAME || "",
   title: process.env.NEXT_PUBLIC_ACCOUNT_TITLE || "",
@@ -45,14 +40,27 @@ export default function PaymentForm({
   const [error, setError] = useState("");
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [compressing, setCompressing] = useState(false);
   const [thirdParty, setThirdParty] = useState(false);
   const [payerName, setPayerName] = useState("");
 
-  function handleFile(file: File | null) {
-    setScreenshot(file);
+  async function handleFile(input: File | null) {
     setError("");
     if (preview) URL.revokeObjectURL(preview);
-    setPreview(file ? URL.createObjectURL(file) : null);
+
+    if (!input) {
+      setScreenshot(null);
+      setPreview(null);
+      return;
+    }
+
+    // Downscale before it ever reaches the network. A phone screenshot is
+    setCompressing(true);
+    const file = await compressImage(input);
+    setCompressing(false);
+
+    setScreenshot(file);
+    setPreview(URL.createObjectURL(file));
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -60,7 +68,8 @@ export default function PaymentForm({
     if (!screenshot) {
       return setError(t.booking.errScreenshot);
     }
-    if (screenshot.size > 5 * 1024 * 1024) {
+    // Only reachable if compression could not get it under the cap.
+    if (screenshot.size > MAX_UPLOAD_BYTES) {
       return setError(t.booking.errTooBig);
     }
     if (thirdParty && payerName.trim().length < 3) {
@@ -205,10 +214,14 @@ export default function PaymentForm({
             <path d="M12 5v12" />
           </svg>
           <span className="font-body text-sm text-fg">
-            {screenshot ? screenshot.name : t.booking.choose}
+            {compressing
+              ? t.booking.optimising
+              : screenshot
+              ? screenshot.name
+              : t.booking.choose}
           </span>
           <span className="font-body text-[11px] text-muted/70">
-            {t.booking.fileLimit}
+            {t.booking.fileLimit.replace("{max}", String(MAX_UPLOAD_MB))}
           </span>
         </label>
 

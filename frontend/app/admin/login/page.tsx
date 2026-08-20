@@ -20,9 +20,7 @@ export default function AdminLoginPage() {
     setError("");
 
     try {
-      // Rejects with "no admin access" if the credentials are valid but the
-      // account's role isn't admin — so a customer typing this URL gets a
-      // clear answer rather than a token that fails on every request after.
+      // 403 = credentials valid but role isn't admin.
       await adminLogin(
         String(data.get("phone") || ""),
         String(data.get("password") || "")

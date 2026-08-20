@@ -1,12 +1,3 @@
-/*
- * Mirrors frontend/lib/datetime.ts so the approval email shows a session at
- * exactly the same time the customer sees in their account.
- *
- * The timezone is pinned rather than left to the server's locale — a backend
- * deployed outside Pakistan would otherwise email people a time several hours
- * off from the one on the website, which is the kind of bug that gets someone
- * to miss their appointment.
- */
 const TIME_ZONE = "Asia/Karachi";
 const TIME_ZONE_LABEL = "PKT";
 

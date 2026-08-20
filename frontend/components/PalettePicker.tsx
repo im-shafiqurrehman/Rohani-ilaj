@@ -3,11 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "./ThemeProvider";
 
-/**
- * Colour-family switcher. Sits next to the light/dark toggle: the toggle picks
- * the mode, this picks the palette, and the two combine — five palettes × two
- * modes = ten themes, all generated from lib/palettes.ts.
- */
 export default function PalettePicker() {
   const { palette, palettes, setPalette } = useTheme();
   const [open, setOpen] = useState(false);

@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useLang } from "./LanguageProvider";
 
-/** The translated half of the hero. Split out because Hero itself resolves the
- *  banner from the filesystem and must stay a server component. */
 export default function HeroCopy({ hasBanner }: { hasBanner: boolean }) {
   const { t } = useLang();
 

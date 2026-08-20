@@ -1,25 +1,3 @@
-/*
- * ─────────────────────────────────────────────────────────────────────────
- *  PLACEHOLDER CONTENT — REPLACE BEFORE LAUNCH
- * ─────────────────────────────────────────────────────────────────────────
- *  These are NOT real client testimonials. They are sample entries showing
- *  the shape and the tone to use, so the section can be styled and reviewed
- *  now and filled with genuine feedback later.
- *
- *  Publishing invented testimonials as if they were real would be both
- *  misleading to people who are often in genuine distress and a policy
- *  problem on ad platforms. Swap every entry below for feedback an actual
- *  client has given permission to publish, then delete this notice.
- *
- *  Tone rules for real entries, matching the rest of the site:
- *    - "rehnumai" / "mashwara" (guidance, consultation) — never a promise
- *      of a cure or a guaranteed result.
- *    - First name + city is enough; do not publish full names or numbers
- *      without written permission.
- *    - Keep each entry to two or three lines so the section stays scannable
- *      for readers who are not comfortable with long blocks of text.
- * ─────────────────────────────────────────────────────────────────────────
- */
 
 export type Review = {
   name: string;
@@ -27,14 +5,9 @@ export type Review = {
   rating: number; // 1-5
   service: "call" | "physical";
   text: string;
-  /** English rendering of the same feedback, shown when the site is in
-   *  English. Real entries need both. */
   textEn: string;
 };
 
-/** Flip to true once the entries below are real, published-with-permission
- *  feedback. While false, the section renders a quiet "coming soon" state in
- *  production instead of showing sample text to real visitors. */
 export const REVIEWS_ARE_REAL = false;
 
 export const REVIEWS: Review[] = [

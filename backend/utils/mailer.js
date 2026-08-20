@@ -1,14 +1,6 @@
 const nodemailer = require("nodemailer");
 const { formatSlotRange } = require("./datetime");
 
-/*
- * Outbound mail for the public contact form.
- *
- * Kept behind a lazy singleton so the server still boots (and bookings still
- * work) when SMTP hasn't been configured yet — only the contact endpoint
- * degrades, and it says so plainly instead of throwing at startup.
- */
-
 let transporter = null;
 
 function isConfigured() {
@@ -83,7 +75,7 @@ async function sendContactEmail({ name, phone, email, topic, message }) {
   `;
 
   return tx.sendMail({
-    // Must be an address the SMTP account is allowed to send as, so the
+    // Must be an address the SMTP account may send as; visitor goes in replyTo.
     // visitor's own address goes in replyTo instead of from.
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: process.env.CONTACT_TO_EMAIL,
@@ -102,16 +94,6 @@ function escapeHtml(s) {
     .replace(/"/g, "&quot;");
 }
 
-/**
- * Tells a customer their payment was approved or rejected.
- *
- * Email because it is the only channel that costs nothing: SMTP is already
- * configured for the contact form. WhatsApp and SMS both require a paid
- * provider (see the notes in README/env).
- *
- * Never throws — a mail failure must not roll back an approval the ustad has
- * already made. Returns a reason instead so the caller can surface it.
- */
 async function sendBookingDecisionEmail(booking, { contactNumber } = {}) {
   if (!booking.customerEmail) return { sent: false, reason: "no-email" };
 
@@ -128,9 +110,6 @@ async function sendBookingDecisionEmail(booking, { contactNumber } = {}) {
     booking.slotReference ? ["Slot reference", booking.slotReference] : null,
     approved && contactNumber ? ["Contact number", contactNumber] : null,
     // Deliberately no meeting link: Calendly already emails its own
-    // confirmation containing it when the slot is booked. Repeating it here
-    // gives the customer two links to choose between, and one of them can go
-    // stale if the event is ever rescheduled.
     booking.adminNote ? ["Note", booking.adminNote] : null,
   ].filter(Boolean);
 
@@ -215,17 +194,6 @@ function bookingRows(booking) {
   ].filter(Boolean);
 }
 
-/**
- * NOT CURRENTLY SENT. Policy is one customer email only, at approval time.
- * Retained because re-enabling it is a single call in bookingController.
- *
- * Acknowledges a booking the moment it is submitted, so the customer has
- * written proof their receipt arrived — otherwise the only feedback is a
- * screen they navigate away from, and the next step is a worried WhatsApp
- * message asking whether it went through.
- *
- * The contact number is NOT included: the payment has not been approved yet.
- */
 async function sendBookingReceivedEmail(booking) {
   if (!booking.customerEmail) return { sent: false, reason: "no-email" };
   const tx = getTransporter();
@@ -258,10 +226,6 @@ async function sendBookingReceivedEmail(booking) {
   }
 }
 
-/**
- * Tells the practitioner a booking is waiting. Goes to CONTACT_TO_EMAIL, the
- * same inbox the contact form uses.
- */
 async function sendNewBookingAlert(booking) {
   const tx = getTransporter();
   if (!tx || !process.env.CONTACT_TO_EMAIL) {
@@ -297,9 +261,6 @@ async function sendNewBookingAlert(booking) {
   }
 }
 
-/** Opens a real connection and authenticates, without sending anything.
- *  Used by `npm run test:email` to separate "credentials wrong" from
- *  "template broken". */
 async function verifyConnection() {
   const tx = getTransporter();
   if (!tx) return { ok: false, reason: "SMTP is not configured" };

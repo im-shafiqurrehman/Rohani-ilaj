@@ -1,14 +1,3 @@
-/*
- * Two languages, one dictionary.
- *
- * Urdu is the default and the site's primary language. English is opt-in via
- * the header switch, and switching also flips document direction — Urdu is
- * RTL, English is LTR — which is why the language lives on <html> rather than
- * in React state alone.
- *
- * The header and footer are English in BOTH modes by design: they are the
- * site's chrome and read as a brand, so they need no entries here.
- */
 
 export type Lang = "ur" | "en";
 
@@ -143,14 +132,15 @@ export const DICT = {
       receiptLabel: "ادائیگی کی رسید کا اسکرین شاٹ",
       receiptHint: "بس رسید کی تصویر لگا دیں — باقی تفصیلات ہم خود دیکھ لیں گے۔",
       choose: "تصویر منتخب کریں",
-      fileLimit: "JPG یا PNG — زیادہ سے زیادہ 5MB",
+      fileLimit: "JPG یا PNG — زیادہ سے زیادہ {max}MB",
+      optimising: "تصویر تیار کی جا رہی ہے...",
       thirdParty: "ادائیگی کسی اور کے اکاؤنٹ سے کی گئی ہے",
       payerName: "اکاؤنٹ ہولڈر کا نام",
       payerHint: "جس شخص کے اکاؤنٹ یا کارڈ سے رقم بھیجی گئی",
       submit: "تصدیق کے لیے بھیجیں",
       submitting: "بھیجا جا رہا ہے...",
       errScreenshot: "براہِ کرم ادائیگی کا اسکرین شاٹ منسلک کریں۔",
-      errTooBig: "اسکرین شاٹ بہت بڑا ہے۔ 5MB سے کم ہونا چاہیے۔",
+      errTooBig: "اسکرین شاٹ بہت بڑا ہے۔ براہِ کرم چھوٹی تصویر منتخب کریں۔",
       errPayer: "جس کے اکاؤنٹ سے ادائیگی کی گئی، اُن کا نام لکھیں۔",
       errGeneric: "کچھ مسئلہ ہو گیا، دوبارہ کوشش کریں۔",
       doneTitle: "درخواست موصول ہو گئی",
@@ -342,14 +332,15 @@ export const DICT = {
       receiptLabel: "Screenshot of the payment receipt",
       receiptHint: "Just attach a picture of the receipt — we will read the rest ourselves.",
       choose: "Choose an image",
-      fileLimit: "JPG or PNG — 5MB maximum",
+      fileLimit: "JPG or PNG — {max}MB maximum",
+      optimising: "Preparing image…",
       thirdParty: "The payment was made from someone else's account",
       payerName: "Account holder's name",
       payerHint: "The person whose account or card the money was sent from",
       submit: "Submit for verification",
       submitting: "Sending…",
       errScreenshot: "Please attach a screenshot of the payment.",
-      errTooBig: "That screenshot is too large. It must be under 5MB.",
+      errTooBig: "That screenshot is too large. Please choose a smaller image.",
       errPayer: "Please enter the name of the account the payment came from.",
       errGeneric: "Something went wrong. Please try again.",
       doneTitle: "Request received",
@@ -420,9 +411,6 @@ export const DICT = {
 /** The shape every language must satisfy, derived from the Urdu entry. */
 export type Dict = (typeof DICT)["ur"];
 
-/* Compile-time completeness check. If a key is added to `ur` and forgotten in
- * `en` (or vice versa), this line fails the type check — so a missing
- * translation is a build error, never a blank space on a live page. */
 const _exhaustive: Record<Lang, Dict> = DICT;
 void _exhaustive;
 

@@ -7,12 +7,6 @@ import {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
-/*
- * There is one session, not two. An admin is just a user whose role is
- * "admin", so the admin panel reads the same token the rest of the site uses
- * — no second credential to get out of sync, and signing out signs you out
- * everywhere.
- */
 export const getToken = getUserToken;
 export const setToken = setUserToken;
 export const clearToken = clearUserToken;
@@ -32,8 +26,6 @@ export async function adminLogin(phone: string, password: string) {
 
 export type Booking = {
   _id: string;
-  /** Present when the customer had an account at booking time, or created
-   *  one later with the same phone number. */
   user?: string;
   serviceType: "call" | "physical";
   amount: number;
@@ -56,9 +48,6 @@ export type Booking = {
   createdAt: string;
 };
 
-/** Attached by the API to an approve/reject response: did the customer
- *  actually get told? A silent failure here means someone who paid believes
- *  they were ignored. */
 export type NotifyResult = { sent: boolean; reason?: string };
 
 export type Stats = {
