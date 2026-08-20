@@ -9,13 +9,13 @@ export const dirFor = (lang: Lang) => (lang === "ur" ? "rtl" : "ltr");
 export const DICT = {
   ur: {
     hero: {
-      eyebrow: "Rohani Ilaj Center",
-      title1: "روحانی",
-      title2: "علاج",
-      lede: "قرآن و سنت کی بنیاد پر روحانی رہنمائی۔ جادو، جنات، نظرِ بد اور حسد کے مسائل میں مشورہ اور علاج، مکمل رازداری کے ساتھ۔",
+      eyebrow: "روحانی علاج سنٹر",
+      title1: "قرآن و سنت کی بنیاد پر",
+      title2: "روحانی رہنمائی",
+      lede: "جادو، جنات، نظرِ بد، حسد اور اسی نوعیت کے روحانی مسائل میں رہنمائی اور مشورہ، قرآن و سنت کی حدود میں رہتے ہوئے۔ لاہور میں روبرو اور فون پر، مکمل رازداری کے ساتھ۔",
       ctaBook: "مشاورت بک کریں",
       ctaServices: "خدمات دیکھیں",
-      note: "لاہور میں روبرو اور فون پر۔ کوئی جھوٹا وعدہ نہیں، کوئی ضمانت نہیں۔",
+      note: "کوئی تعویذ نہیں۔ کوئی توہم پرستی نہیں۔ کوئی جھوٹا وعدہ نہیں۔",
     },
     services: {
       eyebrow: "Services",
@@ -25,7 +25,7 @@ export const DICT = {
       method: "طریقہ",
       book: "بک کریں",
       footnote:
-        "دونوں نشستیں 30 منٹ کی ہیں۔ فزیکل سیشن میں ضرورت کے مطابق وقت بڑھایا جا سکتا ہے۔",
+        "دونوں نشستیں 30 منٹ کی ہیں۔ اگر فزیکل سیشن میں مسئلے کے مطابق زیادہ وقت درکار ہو تو وہ اضافی وقت اسی فیس میں شامل ہے، کوئی اضافی رقم نہیں لی جاتی۔",
       call: {
         title: "ابتدائی کال",
         durationValue: "30 منٹ",
@@ -36,7 +36,7 @@ export const DICT = {
         title: "فزیکل سیشن",
         durationValue: "30 منٹ",
         note: "لاہور میں براہِ راست ملاقات",
-        desc: "روبرو نشست، جس میں جنات کا اخراج اور دیگر سنگین معاملات پر شرعی طریقے سے کام کیا جاتا ہے۔ ضرورت کے مطابق دورانیہ بڑھایا جا سکتا ہے۔",
+        desc: "روبرو نشست، جس میں جنات کا اخراج اور دیگر سنگین معاملات پر شرعی طریقے سے کام کیا جاتا ہے۔ اگر معاملے کو 30 منٹ سے زیادہ وقت درکار ہو تو وہ وقت اسی فیس میں شامل ہے۔",
       },
       currency: "روپے",
     },
@@ -199,7 +199,7 @@ export const DICT = {
     fab: "پیغام بھیجیں",
     whatsapp: "واٹس ایپ",
     whatsappAria: "واٹس ایپ پر ہم سے رابطہ کریں",
-    whatsappPrefill: "السلام علیکم، مجھے روحانی علاج کے بارے میں معلومات چاہیے۔",
+    whatsappPrefill: "السلام علیکم، میں روحانی علاج سنٹر میں مشاورت بک کرنا چاہتا ہوں۔",
     footer: {
       tagline:
         "قرآن و سنت کی روشنی میں روحانی رہنمائی۔ نشستیں صرف اپائنٹمنٹ پر، لاہور میں روبرو یا کال پر۔",
@@ -216,12 +216,12 @@ export const DICT = {
   en: {
     hero: {
       eyebrow: "Rohani Ilaj Center",
-      title1: "Spiritual",
-      title2: "Healing",
-      lede: "Quran and Sunnah based spiritual guidance for matters of black magic, jinn, the evil eye and envy. In person in Lahore, or by phone. Handled in complete confidence.",
+      title1: "Qur'an \u0026 Sunnah-Based",
+      title2: "Spiritual Guidance",
+      lede: "Guidance and consultation for concerns related to spiritual distress, the evil eye, sihr, jinn and related matters, within the boundaries of Qur'an and Sunnah. In person in Lahore or by phone, in complete confidence.",
       ctaBook: "Book a Consultation",
       ctaServices: "View services",
-      note: "Lahore and online. No false promises, no guaranteed results.",
+      note: "No amulets. No superstition. No false promises.",
     },
     services: {
       eyebrow: "Services",
@@ -231,7 +231,7 @@ export const DICT = {
       method: "Format",
       book: "Book now",
       footnote:
-        "Both sessions are 30 minutes. A physical session can run longer if the case requires it.",
+        "Both sessions are 30 minutes. If an in-person session needs longer than that, the additional time is included in the same fee at no extra charge.",
       call: {
         title: "Initial Consultation",
         durationValue: "30 minutes",
@@ -242,7 +242,7 @@ export const DICT = {
         title: "In-Person Session",
         durationValue: "30 minutes",
         note: "In person, Lahore",
-        desc: "A face-to-face sitting covering jinn expulsion and other serious matters, handled strictly within Shariah. The duration can be extended as needed.",
+        desc: "A face-to-face sitting covering jinn expulsion and other serious matters, handled strictly within Shariah. If the case needs longer than 30 minutes, that time is included at no extra charge.",
       },
       currency: "PKR",
     },
@@ -405,7 +405,7 @@ export const DICT = {
     fab: "Send a message",
     whatsapp: "WhatsApp",
     whatsappAria: "Contact us on WhatsApp",
-    whatsappPrefill: "Assalam-o-alaikum, I would like some information about Rohani Ilaj.",
+    whatsappPrefill: "Assalam-o-alaikum, I would like to book a consultation at Rohani Ilaj Center.",
     footer: {
       tagline:
         "Quran and Sunnah based spiritual guidance. Consultations by appointment, in person in Lahore or by phone.",

@@ -29,7 +29,7 @@ export const SERVICES = [
     price: 5000,
     minutes: 30,
     description:
-      "A face-to-face consultation in Lahore covering jinn expulsion and other serious matters, handled strictly within Shariah. The duration can be extended as the case requires.",
+      "A face-to-face consultation in Lahore covering jinn expulsion and other serious matters, handled strictly within Shariah. Scheduled for 30 minutes; if the case needs longer, the additional time is included at no extra charge.",
   },
 ];
 

@@ -8,11 +8,15 @@ export const FAQS: Record<"ur" | "en", Faq[]> = {
     },
     {
       q: "ابتدائی کال اور فزیکل سیشن میں کیا فرق ہے؟",
-      a: "ابتدائی کال 30 منٹ کی ہوتی ہے اور صرف فون کال پر ہوتی ہے، جس کی فیس 2,000 روپے ہے۔ اس میں آپ کا مسئلہ سنا اور سمجھا جاتا ہے۔ فزیکل سیشن 30 منٹ کا ہے اور لاہور میں روبرو ہوتا ہے، جس کی فیس 5,000 روپے ہے۔ ضرورت کے مطابق اس کا وقت بڑھایا جا سکتا ہے۔",
+      a: "ابتدائی کال 30 منٹ کی ہوتی ہے اور صرف فون کال پر ہوتی ہے، جس کی فیس 2,000 روپے ہے۔ اس میں آپ کا مسئلہ سنا اور سمجھا جاتا ہے۔ فزیکل سیشن 30 منٹ کا ہے اور لاہور میں روبرو ہوتا ہے، جس کی فیس 5,000 روپے ہے۔ اگر معاملے کو زیادہ وقت درکار ہو تو وہ وقت اسی فیس میں شامل ہے، اضافی رقم نہیں لی جاتی۔",
     },
     {
       q: "فزیکل سیشن میں کیا کیا جاتا ہے؟",
       a: "فزیکل سیشن میں جنات کا اخراج اور اسی نوعیت کے سنگین اور نازک معاملات پر کام کیا جاتا ہے۔ ایسے معاملات فون پر نہیں ہو سکتے، اسی لیے ان کے لیے روبرو حاضری ضروری ہے۔ ہر عمل قرآن و سنت کے دائرے میں رہ کر کیا جاتا ہے۔",
+    },
+    {
+      q: "اگر نشست 30 منٹ سے لمبی ہو جائے تو کیا اضافی فیس دینی ہوگی؟",
+      a: "نہیں۔ 5,000 روپے کی فیس پوری نشست کے لیے ہے، چاہے وہ کتنی ہی دیر چلے۔ اگر معاملے کو زیادہ وقت درکار ہو تو وہ وقت اسی فیس میں شامل ہے۔ ہم کبھی بعد میں اضافی رقم کا مطالبہ نہیں کرتے۔",
     },
     {
       q: "ادائیگی کا طریقہ کیا ہے؟",
@@ -47,11 +51,15 @@ export const FAQS: Record<"ur" | "en", Faq[]> = {
     },
     {
       q: "What is the difference between the initial call and a physical session?",
-      a: "The initial call is 30 minutes, by phone call only, and costs Rs 2,000. It is where your situation is heard and understood. The physical session is 30 minutes, held in person in Lahore, and costs Rs 5,000. It can run longer if the case requires it.",
+      a: "The initial call is 30 minutes, by phone call only, and costs Rs 2,000. It is where your situation is heard and understood. The in-person session is 30 minutes, held in Lahore, and costs Rs 5,000. If the case needs longer, that time is included in the same fee at no extra charge.",
     },
     {
       q: "What happens in a physical session?",
       a: "Physical sessions cover jinn expulsion and other serious or sensitive matters of that kind. Cases like these cannot be handled over the phone, which is why attending in person is necessary. Everything is done strictly within the bounds of the Quran and Sunnah.",
+    },
+    {
+      q: "If the session runs longer than 30 minutes, is there an extra charge?",
+      a: "No. The Rs 5,000 fee covers the full session, however long it takes. If the case needs more time, that time is included. We never ask for more money afterwards.",
     },
     {
       q: "How do I pay?",
