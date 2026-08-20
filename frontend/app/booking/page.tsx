@@ -2,83 +2,98 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Navbar from "@/components/Navbar";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFab from "@/components/WhatsAppFab";
-import PatternDivider from "@/components/PatternDivider";
 import StepIndicator from "@/components/StepIndicator";
 import CalendlyEmbed from "@/components/CalendlyEmbed";
 import PaymentForm from "@/components/PaymentForm";
+import { Field, Button, Alert } from "@/components/ui";
+import { useAuth } from "@/components/AuthProvider";
+import { useLang } from "@/components/LanguageProvider";
 
 const CALENDLY_URLS = {
   call: process.env.NEXT_PUBLIC_CALENDLY_CALL_URL || "",
   physical: process.env.NEXT_PUBLIC_CALENDLY_PHYSICAL_URL || "",
 };
 
-const SERVICE_LABELS = {
-  call: "ابتدائی کال — 2,000 روپے",
-  physical: "فزیکل سیشن — 5,000 روپے",
-};
+const PRICES = { call: "2,000", physical: "5,000" } as const;
+const SERVICE_KEYS = ["call", "physical"] as const;
 
-const STEP_LABELS = ["سروس", "تفصیل", "وقت", "ادائیگی"];
-
-type ServiceType = "call" | "physical";
+type ServiceType = (typeof SERVICE_KEYS)[number];
 
 function BookingFlow() {
+  const { t } = useLang();
   const params = useSearchParams();
   const preselected = params.get("service");
   const initialService: ServiceType | null =
     preselected === "call" || preselected === "physical" ? preselected : null;
 
   const [service, setService] = useState<ServiceType | null>(initialService);
-  const [contact, setContact] = useState<{ name: string; phone: string } | null>(null);
+  const [contact, setContact] = useState<{
+    name: string;
+    phone: string;
+    email: string;
+  } | null>(null);
   const [scheduled, setScheduled] = useState<{ calendlyEventUri?: string } | null>(null);
 
   const step = !service ? 1 : !contact ? 2 : !scheduled ? 3 : 4;
 
   return (
-    <main>
-      <Navbar />
-      <WhatsAppFab />
+    <>
+      <div className="mt-14">
+        <StepIndicator current={step} labels={t.booking.steps} />
+      </div>
 
-      <section className="mx-auto max-w-2xl px-6 py-14">
-        <h1 className="text-center text-4xl text-navy">
-          <span className="text-gold-gradient">بکنگ</span>
-        </h1>
-        <PatternDivider />
-
-        <div className="mt-10">
-          <StepIndicator current={step} labels={STEP_LABELS} />
-        </div>
-
+      <div className="mt-14">
         {/* Step 1 — pick a service */}
         {step === 1 && (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {(["call", "physical"] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => setService(s)}
-                className="rounded-2xl border border-gold bg-white px-6 py-8 font-body text-navy shadow-card transition hover:border-gold-deep hover:bg-gold-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
-              >
-                {SERVICE_LABELS[s]}
-              </button>
-            ))}
-          </div>
-        )}
+            <div className="grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2">
+              {SERVICE_KEYS.map((key) => {
+                const svc = t.services[key];
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setService(key)}
+                    className="group bg-surface p-8 text-start transition-colors duration-500 ease-editorial hover:bg-surface-2 focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+                  >
+                    <p className="eyebrow font-body" dir="ltr">
+                      {key === "call" ? "Initial Call" : "Physical Session"}
+                    </p>
+                    <h2 className="mt-5 text-2xl font-light text-fg">
+                      {svc.title}
+                    </h2>
+                    <p className="mt-4 font-display text-3xl font-light text-accent">
+                      {PRICES[key]}{" "}
+                      <span className="font-body text-sm text-muted">
+                        {t.services.currency}
+                      </span>
+                    </p>
+                    <p className="mt-4 font-body text-xs leading-6 text-muted">
+                      {`${svc.durationValue} · ${svc.note}`}
+                    </p>
+                    <span className="mt-7 inline-flex items-center gap-2 border-b border-line pb-1 font-body text-sm text-fg transition-colors duration-500 group-hover:border-accent group-hover:text-accent">
+                      {t.booking.select} <span aria-hidden="true">←</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
-        {/* Step 2 — name and phone, which then pre-fill Calendly */}
+        {/* Step 2 — name, phone and email, which then pre-fill Calendly */}
         {step === 2 && service && (
           <ContactStep
             onBack={() => setService(null)}
-            onNext={(name, phone) => setContact({ name, phone })}
+            onNext={(name, phone, email) => setContact({ name, phone, email })}
           />
         )}
 
         {/* Step 3 — pick a slot */}
         {step === 3 && service && contact && (
           <div>
-            <p className="mb-4 text-center font-body text-sm text-navy/70">
-              اپنی پسند کا وقت منتخب کریں
+            <p className="mb-6 text-center font-body text-sm text-muted">
+              {t.booking.pickTime}
             </p>
             <CalendlyEmbed
               url={CALENDLY_URLS[service]}
@@ -95,13 +110,12 @@ function BookingFlow() {
             serviceType={service}
             customerName={contact.name}
             customerPhone={contact.phone}
+            customerEmail={contact.email}
             calendlyEventUri={scheduled.calendlyEventUri}
           />
         )}
-      </section>
-
-      <Footer />
-    </main>
+      </div>
+    </>
   );
 }
 
@@ -109,91 +123,129 @@ function ContactStep({
   onNext,
   onBack,
 }: {
-  onNext: (name: string, phone: string) => void;
+  onNext: (name: string, phone: string, email: string) => void;
   onBack: () => void;
 }) {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const { t } = useLang();
+  const { user } = useAuth();
+  // Signed-in customers shouldn't retype what the account already knows.
+  const [name, setName] = useState(user?.name ?? "");
+  const [phone, setPhone] = useState(user?.phone ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
   const [error, setError] = useState("");
 
   function handleContinue() {
     if (name.trim().length < 3) {
-      setError("براہِ کرم اپنا پورا نام لکھیں۔");
-      return;
+      return setError(t.contact.errName);
     }
     if (phone.replace(/\D/g, "").length < 10) {
-      setError("براہِ کرم درست فون نمبر لکھیں۔");
-      return;
+      return setError(t.contact.errPhone);
     }
-    onNext(name.trim(), phone.trim());
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return setError(t.booking.errEmail);
+    }
+    onNext(name.trim(), phone.trim(), email.trim());
   }
 
   return (
-    <div className="space-y-5 text-right">
-      <div>
-        <label htmlFor="name" className="mb-2 block font-body text-sm text-navy/80">
-          آپ کا نام
-        </label>
-        <input
-          id="name"
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-            setError("");
-          }}
-          className="w-full rounded-lg border border-gold bg-white px-3 py-2.5 font-body text-sm text-navy outline-none focus:border-gold-deep focus-visible:ring-2 focus-visible:ring-gold-deep/40"
-        />
-      </div>
+    <div className="space-y-8">
+      <Field
+        label={t.booking.name}
+        name="name"
+        value={name}
+        onChange={(e: any) => {
+          setName(e.target.value);
+          setError("");
+        }}
+        required
+      />
+      <Field
+        label={t.booking.phone}
+        hint={t.booking.phoneHint}
+        name="phone"
+        type="tel"
+        inputMode="numeric"
+        placeholder="03XX-XXXXXXX"
+        value={phone}
+        onChange={(e: any) => {
+          setPhone(e.target.value);
+          setError("");
+        }}
+        required
+      />
 
-      <div>
-        <label htmlFor="phone" className="mb-2 block font-body text-sm text-navy/80">
-          واٹس ایپ نمبر
-        </label>
-        <p className="mb-2 font-body text-xs text-navy/50">
-          اسی نمبر پر بکنگ کی تصدیق بھیجی جائے گی
-        </p>
-        <input
-          id="phone"
-          type="tel"
-          inputMode="numeric"
-          placeholder="03XX-XXXXXXX"
-          value={phone}
-          onChange={(e) => {
-            setPhone(e.target.value);
-            setError("");
-          }}
-          className="w-full rounded-lg border border-gold bg-white px-3 py-2.5 font-body text-sm text-navy placeholder-navy/30 outline-none focus:border-gold-deep focus-visible:ring-2 focus-visible:ring-gold-deep/40"
-        />
-      </div>
+      <Field
+        label={t.booking.email}
+        hint={t.booking.emailHint}
+        name="email"
+        type="email"
+        inputMode="email"
+        autoComplete="email"
+        required
+        value={email}
+        onChange={(e: any) => {
+          setEmail(e.target.value);
+          setError("");
+        }}
+      />
 
-      {error && (
-        <p role="alert" className="font-body text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {error && <Alert>{error}</Alert>}
 
       <div className="flex gap-3">
-        <button
-          onClick={onBack}
-          className="rounded-full border border-gold px-6 py-3 font-body text-sm text-navy/70 transition hover:bg-gold-soft hover:text-navy"
-        >
-          واپس
-        </button>
-        <button
-          onClick={handleContinue}
-          className="flex-1 rounded-full bg-navy py-3 font-body font-semibold text-white shadow-card transition hover:bg-navy-light"
-        >
-          آگے بڑھیں
-        </button>
+        <Button variant="outline" onClick={onBack} type="button">
+          {t.booking.back}
+        </Button>
+        <Button onClick={handleContinue} type="button" className="flex-1">
+          {t.booking.next}
+        </Button>
       </div>
     </div>
   );
 }
 
-export default function BookingPage() {
+/* Matches the height of the step indicator + first step so the page doesn't
+   jump when the client-rendered flow replaces it. */
+function BookingSkeleton() {
+  const { t } = useLang();
+
   return (
-    <Suspense fallback={null}>
-      <BookingFlow />
-    </Suspense>
+    <>
+      <div className="mt-14">
+        <StepIndicator current={1} labels={t.booking.steps} />
+      </div>
+      <div className="mt-14 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2">
+        {[0, 1].map((i) => (
+          <div key={i} className="min-h-[19rem] bg-surface p-8" aria-hidden="true" />
+        ))}
+      </div>
+    </>
+  );
+}
+
+export default function BookingPage() {
+  const { t } = useLang();
+
+  return (
+    <>
+      <Header />
+      <WhatsAppFab />
+
+      <main className="mx-auto max-w-2xl px-6 py-20">
+        <header className="text-center">
+          <p className="eyebrow font-body" dir="ltr">
+            {t.booking.eyebrow}
+          </p>
+          <h1 className="mt-5 text-title font-light text-fg">{t.booking.title}</h1>
+        </header>
+
+        {/* Only this subtree reads ?service=, so only this subtree defers to
+            the client — the header, title and footer still pre-render. */}
+        <Suspense fallback={<BookingSkeleton />}>
+          <BookingFlow />
+        </Suspense>
+      </main>
+
+      <Footer />
+    </>
   );
 }

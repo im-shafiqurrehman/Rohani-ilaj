@@ -1,0 +1,155 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import ThemeToggle from "./ThemeToggle";
+import PalettePicker from "./PalettePicker";
+import LanguageToggle from "./LanguageToggle";
+import { useAuth } from "./AuthProvider";
+import { NAV, SITE } from "@/lib/site";
+
+/*
+ * English chrome over Urdu content, per the brief. The header is dir="ltr"
+ * inside the RTL document so the logo sits left and the actions sit right,
+ * the way an English navigation is read.
+ */
+export default function Header() {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header
+      dir="ltr"
+      className={`sticky top-0 z-50 transition-all duration-500 ease-editorial ${
+        scrolled
+          ? "border-b border-line bg-ink/85 backdrop-blur-xl"
+          : "border-b border-transparent bg-transparent"
+      }`}
+    >
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4">
+        <Link
+          href="/"
+          className="group flex items-center gap-3 focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+          aria-label={`${SITE.name} — home`}
+        >
+          <Image
+            src="/asset/logo-mark.png"
+            alt=""
+            width={421}
+            height={541}
+            priority
+            className="h-9 w-auto"
+          />
+          <span className="flex flex-col leading-none">
+            <span className="text-glow font-display text-[17px] font-medium tracking-wide">
+              Rohani Ilaj
+            </span>
+            <span className="mt-0.5 font-body text-[9px] tracking-[0.28em] text-muted">
+              CENTER
+            </span>
+          </span>
+        </Link>
+
+        <nav className="hidden items-center gap-9 lg:flex">
+          {NAV.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="link-underline font-body text-[13px] tracking-wide text-muted transition-colors duration-300 hover:text-fg"
+            >
+              {l.label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2.5">
+          <LanguageToggle />
+          <PalettePicker />
+          <ThemeToggle />
+
+          {!loading &&
+            (user ? (
+              <Link
+                href="/account"
+                className="hidden rounded-full border border-line px-4 py-2 font-body text-[13px] text-fg transition-colors duration-300 hover:border-accent/60 hover:text-accent sm:inline-flex"
+              >
+                {user.name.split(" ")[0]}
+              </Link>
+            ) : (
+              <Link
+                href="/account/login"
+                className="hidden font-body text-[13px] text-muted transition-colors duration-300 hover:text-fg sm:inline-flex"
+              >
+                Sign in
+              </Link>
+            ))}
+
+          <Link
+            href="/booking"
+            className="glow-button hidden rounded-full bg-accent px-5 py-2 font-body text-[13px] tracking-wide text-accent-fg transition-all duration-500 ease-editorial hover:brightness-110 sm:inline-flex"
+          >
+            Book a session
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-label="Menu"
+            className="grid h-9 w-9 place-items-center rounded-full border border-line text-fg lg:hidden"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+              {open ? <path d="M18 6 6 18M6 6l12 12" /> : <path d="M3 7h18M3 12h18M3 17h18" />}
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {open && (
+        <div className="border-t border-line bg-ink/95 px-6 py-4 backdrop-blur-xl lg:hidden">
+          <nav className="flex flex-col">
+            {NAV.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="border-b border-line/60 py-3 font-body text-sm text-muted transition-colors hover:text-fg"
+              >
+                {l.label}
+              </a>
+            ))}
+          </nav>
+          <div className="mt-5 flex items-center justify-between gap-3">
+            <LanguageToggle />
+            <PalettePicker />
+          </div>
+          <div className="mt-4 flex items-center gap-3">
+            <Link
+              href="/booking"
+              onClick={() => setOpen(false)}
+              className="flex-1 rounded-full bg-accent py-2.5 text-center font-body text-sm text-accent-fg"
+            >
+              Book a session
+            </Link>
+            <Link
+              href={user ? "/account" : "/account/login"}
+              onClick={() => setOpen(false)}
+              className="rounded-full border border-line px-5 py-2.5 font-body text-sm text-fg"
+            >
+              {user ? "Account" : "Sign in"}
+            </Link>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}

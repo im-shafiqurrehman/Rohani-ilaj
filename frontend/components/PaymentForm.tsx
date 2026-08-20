@@ -1,20 +1,26 @@
 "use client";
 
+import Link from "next/link";
 import { useState, FormEvent } from "react";
 import { submitBooking } from "@/lib/api";
+import { useAuth } from "./AuthProvider";
+import { useLang } from "./LanguageProvider";
 import CopyField from "./CopyField";
+import { Field, Button, Alert } from "./ui";
+import { CONTACT_LINK } from "@/lib/site";
 
 /*
  * Card is the only payment method on offer. The customer pays from their own
  * debit/credit card into the business bank account below, then uploads the
- * receipt here for manual review — Stripe and card-gateway APIs aren't
- * available to this business yet, so verification stays human.
+ * receipt for manual review — no card gateway is available to this business
+ * yet, so verification stays human.
  */
-const BANK_NAME = process.env.NEXT_PUBLIC_BANK_NAME || "";
-const ACCOUNT_TITLE = process.env.NEXT_PUBLIC_ACCOUNT_TITLE || "";
-const ACCOUNT_NUMBER = process.env.NEXT_PUBLIC_ACCOUNT_NUMBER || "";
-const IBAN = process.env.NEXT_PUBLIC_IBAN || "";
-const WA = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "923173810763").replace(/\D/g, "");
+const BANK = {
+  name: process.env.NEXT_PUBLIC_BANK_NAME || "",
+  title: process.env.NEXT_PUBLIC_ACCOUNT_TITLE || "",
+  number: process.env.NEXT_PUBLIC_ACCOUNT_NUMBER || "",
+  iban: process.env.NEXT_PUBLIC_IBAN || "",
+};
 
 const PRICES = { call: 2000, physical: 5000 };
 
@@ -22,23 +28,29 @@ export default function PaymentForm({
   serviceType,
   customerName,
   customerPhone,
+  customerEmail,
   slotTime,
   calendlyEventUri,
 }: {
   serviceType: "call" | "physical";
   customerName: string;
   customerPhone: string;
+  customerEmail: string;
   slotTime?: string;
   calendlyEventUri?: string;
 }) {
-  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
+  const { user } = useAuth();
+  const { t } = useLang();
+  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [error, setError] = useState("");
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [thirdParty, setThirdParty] = useState(false);
+  const [payerName, setPayerName] = useState("");
 
   function handleFile(file: File | null) {
     setScreenshot(file);
-    setErrorMsg("");
+    setError("");
     if (preview) URL.revokeObjectURL(preview);
     setPreview(file ? URL.createObjectURL(file) : null);
   }
@@ -46,184 +58,220 @@ export default function PaymentForm({
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!screenshot) {
-      setErrorMsg("براہِ کرم ادائیگی کا اسکرین شاٹ منسلک کریں۔");
-      return;
+      return setError(t.booking.errScreenshot);
     }
     if (screenshot.size > 5 * 1024 * 1024) {
-      setErrorMsg("اسکرین شاٹ بہت بڑا ہے۔ 5MB سے کم ہونا چاہیے۔");
-      return;
+      return setError(t.booking.errTooBig);
+    }
+    if (thirdParty && payerName.trim().length < 3) {
+      return setError(t.booking.errPayer);
     }
 
     setStatus("loading");
-    setErrorMsg("");
-    const data = new FormData(e.currentTarget);
+    setError("");
 
     try {
       await submitBooking({
         serviceType,
         customerName,
         customerPhone,
+        customerEmail,
         slotTime,
         calendlyEventUri,
         paymentMethod: "card",
-        accountTitle: String(data.get("accountTitle")),
-        transactionId: String(data.get("transactionId")),
         screenshot,
+        paidByThirdParty: thirdParty,
+        accountTitle: thirdParty ? payerName.trim() : undefined,
       });
       setStatus("done");
     } catch (err: any) {
-      setStatus("error");
-      setErrorMsg(err.message || "کچھ مسئلہ ہو گیا، دوبارہ کوشش کریں۔");
+      setStatus("idle");
+      setError(err.message || t.booking.errGeneric);
     }
   }
 
   if (status === "done") {
     return (
-      <div className="rounded-2xl border border-gold bg-gold-soft p-8 text-center shadow-card">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-navy text-2xl text-gold">
-          ✓
+      <div className="rounded-lg border border-line bg-surface p-10 text-center">
+        <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-accent/50 text-accent">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
         </div>
-        <p className="mt-5 text-xl text-navy">درخواست موصول ہو گئی ہے</p>
-        <p className="mt-3 font-body text-sm leading-7 text-navy/80">
-          آپ کی ادائیگی کی تصدیق کے بعد واٹس ایپ پر بکنگ کی مکمل تفصیلات بھیج دی
-          جائیں گی۔
+        <p className="mt-7 text-2xl font-light text-fg">{t.booking.doneTitle}</p>
+        <p className="mx-auto mt-4 max-w-sm font-body text-sm leading-8 text-muted">
+{t.booking.doneBody}
         </p>
-        <a
-          href={`https://wa.me/${WA}`}
-          className="mt-6 inline-block rounded-full bg-navy px-6 py-2.5 font-body text-sm text-white transition hover:bg-navy-light"
-        >
-          کوئی سوال ہے؟ واٹس ایپ کریں
-        </a>
+
+        <div className="mt-9 flex flex-col items-center gap-3">
+          {user ? (
+            <Button as={Link} href="/account">
+              {t.booking.viewBooking}
+            </Button>
+          ) : (
+            <>
+              <Button as={Link} href="/account/signup">
+                {t.booking.createAccount}
+              </Button>
+              <p className="max-w-xs font-body text-[11px] leading-6 text-muted/70">
+{t.booking.createAccountNote}
+              </p>
+            </>
+          )}
+          <a
+            href={CONTACT_LINK}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="mt-2 border-b border-line pb-0.5 font-body text-sm text-muted transition-colors hover:border-accent hover:text-accent"
+          >
+            {t.booking.question}
+          </a>
+        </div>
       </div>
     );
   }
 
+  const hasBankDetails = Boolean(BANK.number || BANK.iban);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 text-right">
-      <div className="rounded-2xl border border-gold bg-white p-6 shadow-card">
-        <p className="font-body text-sm text-navy/60">ادائیگی کی رقم</p>
-        <p className="mt-1 text-3xl font-semibold text-navy">
-          {PRICES[serviceType].toLocaleString()} روپے
-        </p>
-
-        <div className="mt-5 flex items-center gap-2 rounded-full border border-gold-deep bg-gradient-to-b from-gold-light to-gold px-4 py-2.5 font-body text-sm font-semibold text-navy">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-            <rect x="2" y="5" width="20" height="14" rx="2.5" />
-            <path d="M2 10h20" />
-          </svg>
-          کارڈ / بینک ٹرانسفر
+    <form onSubmit={handleSubmit} className="space-y-10">
+      <div className="rounded-lg border border-line bg-surface p-8">
+        <div className="flex flex-wrap items-baseline justify-between gap-4">
+          <div>
+            <p className="font-body text-[11px] tracking-[0.22em] text-muted" dir="ltr">
+              {t.booking.amountDue}
+            </p>
+            <p className="mt-3 font-display text-4xl font-light text-accent">
+              {PRICES[serviceType].toLocaleString()}{" "}
+              <span className="font-body text-base text-muted">
+              {t.services.currency}
+            </span>
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-body text-[11px] tracking-wide text-muted">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <rect x="2" y="5" width="20" height="14" rx="2.5" />
+              <path d="M2 10h20" />
+            </svg>
+            {t.booking.payMethod}
+          </span>
         </div>
 
-        <p className="mt-4 font-body text-sm leading-7 text-navy/75">
-          اپنے ڈیبٹ یا کریڈٹ کارڈ سے (موبائل بینکنگ ایپ، اے ٹی ایم یا آن لائن
-          بینکنگ کے ذریعے) نیچے دیے گئے اکاؤنٹ میں رقم منتقل کریں، پھر رسید کی
-          تفصیل درج کریں۔
+        <p className="mt-7 font-body text-sm leading-8 text-muted">
+{t.booking.payIntro}
         </p>
 
-        <div className="mt-5 space-y-3">
-          {BANK_NAME && <CopyField label="بینک" value={BANK_NAME} />}
-          {ACCOUNT_TITLE && <CopyField label="اکاؤنٹ ٹائٹل" value={ACCOUNT_TITLE} />}
-          {ACCOUNT_NUMBER && <CopyField label="اکاؤنٹ نمبر" value={ACCOUNT_NUMBER} />}
-          {IBAN && <CopyField label="آئی بین (IBAN)" value={IBAN} />}
-        </div>
-
-        {!ACCOUNT_NUMBER && !IBAN && (
-          <p className="mt-4 rounded-xl border border-gold-deep bg-gold-soft px-4 py-3 font-body text-sm leading-7 text-gold-dark">
-            بینک کی تفصیلات ابھی ترتیب نہیں دی گئیں۔ براہِ کرم واٹس ایپ پر رابطہ
-            کریں۔
-          </p>
+        {hasBankDetails ? (
+          <div className="mt-8 border-t border-line">
+            {BANK.name && <CopyField label={t.booking.bank} value={BANK.name} />}
+            {BANK.title && <CopyField label={t.booking.accountTitle} value={BANK.title} />}
+            {BANK.number && <CopyField label={t.booking.accountNumber} value={BANK.number} />}
+            {BANK.iban && <CopyField label={t.booking.iban} value={BANK.iban} />}
+          </div>
+        ) : (
+          <div className="mt-8">
+            <Alert tone="accent">
+{t.booking.bankMissing}
+            </Alert>
+          </div>
         )}
       </div>
 
-      <div className="space-y-4">
-        <Field
-          label="ادائیگی بھیجنے والے اکاؤنٹ کا ٹائٹل"
-          hint="جس اکاؤنٹ یا کارڈ سے پیسے بھیجے، اُس پر لکھا نام"
-          name="accountTitle"
+      {/* One field. The receipt already shows the account title, the amount
+          and the reference number, so asking the customer to retype any of it
+          only created a place to make a mistake. */}
+      <div>
+        <label
+          htmlFor="screenshot"
+          className="block font-body text-xs tracking-wide text-muted"
+        >
+          {t.booking.receiptLabel}
+        </label>
+        <p className="mt-2 font-body text-[11px] leading-6 text-muted/70">
+          {t.booking.receiptHint}
+        </p>
+
+        <label
+          htmlFor="screenshot"
+          className={`mt-4 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-10 text-center transition-colors duration-500 ease-editorial ${
+            screenshot
+              ? "border-accent/50 bg-surface"
+              : "border-line hover:border-accent/50 hover:bg-surface"
+          }`}
+        >
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-accent">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <path d="m7 10 5-5 5 5" />
+            <path d="M12 5v12" />
+          </svg>
+          <span className="font-body text-sm text-fg">
+            {screenshot ? screenshot.name : t.booking.choose}
+          </span>
+          <span className="font-body text-[11px] text-muted/70">
+            {t.booking.fileLimit}
+          </span>
+        </label>
+
+        <input
+          id="screenshot"
+          type="file"
+          accept="image/*"
           required
-        />
-        <Field
-          label="ٹرانزیکشن آئی ڈی (TID)"
-          hint="رسید پر لکھا نمبر"
-          name="transactionId"
-          required
+          onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+          className="sr-only"
         />
 
-        <div>
-          <label
-            htmlFor="screenshot"
-            className="mb-1 block font-body text-sm text-navy/80"
-          >
-            ادائیگی کی تصدیقی اسکرین شاٹ
-          </label>
-          <p className="mb-2 font-body text-xs text-navy/50">
-            ایک ہی تصویر کافی ہے
-          </p>
-          <input
-            id="screenshot"
-            type="file"
-            accept="image/*"
-            required
-            onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-            className="block w-full rounded-lg border border-gold bg-white px-3 py-2.5 font-body text-sm text-navy/80 file:mr-3 file:rounded-full file:border-0 file:bg-navy file:px-4 file:py-1.5 file:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
+        {preview && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={preview}
+            alt=""
+            className="mt-5 max-h-64 w-full rounded-lg border border-line object-contain"
           />
-          {preview && (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={preview}
-              alt="منتخب کردہ اسکرین شاٹ"
-              className="mt-3 max-h-52 rounded-lg border border-gold object-contain"
+        )}
+
+        {/* Asked only when it matters. If the customer paid from their own
+            account the name is already on the receipt, so making everyone type
+            it is just a field to get wrong. */}
+        <div className="mt-8 border-t border-line pt-7">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={thirdParty}
+              onChange={(e) => {
+                setThirdParty(e.target.checked);
+                setError("");
+              }}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-[rgb(var(--accent))]"
             />
+            <span className="font-body text-sm leading-7 text-fg">
+              {t.booking.thirdParty}
+            </span>
+          </label>
+
+          {thirdParty && (
+            <div className="mt-5">
+              <Field
+                label={t.booking.payerName}
+                hint={t.booking.payerHint}
+                name="accountTitle"
+                value={payerName}
+                onChange={(e: any) => {
+                  setPayerName(e.target.value);
+                  setError("");
+                }}
+                required
+              />
+            </div>
           )}
         </div>
       </div>
 
-      {errorMsg && (
-        <p
-          role="alert"
-          className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 font-body text-sm text-red-700"
-        >
-          {errorMsg}
-        </p>
-      )}
+      {error && <Alert>{error}</Alert>}
 
-      <button
-        type="submit"
-        disabled={status === "loading"}
-        className="w-full rounded-full bg-navy py-3.5 font-body text-base font-semibold text-white shadow-card transition hover:bg-navy-light focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep disabled:opacity-60"
-      >
-        {status === "loading" ? "بھیجا جا رہا ہے..." : "تصدیق کے لیے بھیجیں"}
-      </button>
+      <Button type="submit" disabled={status === "loading"} className="w-full">
+        {status === "loading" ? t.booking.submitting : t.booking.submit}
+      </Button>
     </form>
-  );
-}
-
-function Field({
-  label,
-  hint,
-  name,
-  type = "text",
-  required,
-}: {
-  label: string;
-  hint?: string;
-  name: string;
-  type?: string;
-  required?: boolean;
-}) {
-  return (
-    <div>
-      <label htmlFor={name} className="mb-1 block font-body text-sm text-navy/80">
-        {label}
-      </label>
-      {hint && <p className="mb-2 font-body text-xs text-navy/50">{hint}</p>}
-      <input
-        id={name}
-        type={type}
-        name={name}
-        required={required}
-        className="w-full rounded-lg border border-gold bg-white px-3 py-2.5 font-body text-sm text-navy placeholder-navy/30 outline-none focus:border-gold-deep focus-visible:ring-2 focus-visible:ring-gold-deep/40"
-      />
-    </div>
   );
 }

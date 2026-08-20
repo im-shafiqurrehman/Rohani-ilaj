@@ -5,10 +5,12 @@ const bcrypt = require("bcryptjs");
 const rateLimit = require("express-rate-limit");
 
 const connectDB = require("./config/db");
-const Admin = require("./models/Admin");
+const User = require("./models/User");
+const { normalisePhone } = require("./utils/phone");
 const bookingRoutes = require("./routes/bookings");
 const adminRoutes = require("./routes/admin");
 const contactRoutes = require("./routes/contact");
+const authRoutes = require("./routes/auth");
 
 // Fail fast with a clear message instead of a confusing crash later on.
 const REQUIRED_ENV = [
@@ -17,7 +19,7 @@ const REQUIRED_ENV = [
   "CLOUDINARY_CLOUD_NAME",
   "CLOUDINARY_API_KEY",
   "CLOUDINARY_API_SECRET",
-  "ADMIN_USERNAME",
+  "ADMIN_PHONE",
   "ADMIN_PASSWORD",
 ];
 
@@ -61,6 +63,15 @@ const contactLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Slows down credential stuffing against customer accounts.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: "Bohat zyada koshishein. 15 minute baad try karein." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Slows down password guessing on the admin login.
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -72,6 +83,9 @@ const loginLimiter = rateLimit({
 
 app.use("/api/bookings", bookingLimiter, bookingRoutes);
 app.use("/api/contact", contactLimiter, contactRoutes);
+app.use("/api/auth/signup", authLimiter);
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth", authRoutes);
 app.use("/api/admin/login", loginLimiter);
 app.use("/api/admin", adminRoutes);
 
@@ -96,13 +110,40 @@ app.use((err, req, res, next) => {
 
 // Creates the single admin account from .env the first time the server runs,
 // so there's no separate "sign up" flow for the admin panel.
+/*
+ * Guarantees exactly one admin account exists, identified by ADMIN_PHONE.
+ *
+ * Three cases, because the ustad may well have signed up as a normal customer
+ * with the same number before this ran:
+ *   - no account      -> create one with role "admin"
+ *   - account, role user -> promote it, leaving their bookings intact
+ *   - already admin   -> leave the password alone (it may have been rotated)
+ */
 async function seedAdmin() {
-  const existing = await Admin.findOne({ username: process.env.ADMIN_USERNAME });
-  if (existing) return;
+  const phone = normalisePhone(process.env.ADMIN_PHONE);
+  if (!phone) {
+    console.warn("ADMIN_PHONE is not a usable phone number; skipping admin seed.");
+    return;
+  }
 
-  const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-  await Admin.create({ username: process.env.ADMIN_USERNAME, passwordHash });
-  console.log(`Admin account created: ${process.env.ADMIN_USERNAME}`);
+  const existing = await User.findOne({ phone });
+
+  if (!existing) {
+    await User.create({
+      name: process.env.ADMIN_NAME || "Administrator",
+      phone,
+      passwordHash: await bcrypt.hash(process.env.ADMIN_PASSWORD, 10),
+      role: "admin",
+    });
+    console.log(`Admin account created for ${phone}`);
+    return;
+  }
+
+  if (existing.role !== "admin") {
+    existing.role = "admin";
+    await existing.save();
+    console.log(`Existing account ${phone} promoted to admin`);
+  }
 }
 
 const PORT = process.env.PORT || 5000;

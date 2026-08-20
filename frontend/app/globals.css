@@ -2,44 +2,271 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Theme tokens (--ink, --fg, --accent, …) are generated from lib/palettes.ts
+ * and injected into <head> by app/layout.tsx. Nothing here hard-codes a
+ * colour; everything below is structure only.
+ *
+ * The active theme is the pair of attributes on <html>:
+ *   data-palette="midnight|verdant|ember|indigo|rose"
+ *   data-theme="dark|light"
+ */
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  background-color: #ffffff;
+  background-color: rgb(var(--ink));
+  color: rgb(var(--fg));
+  /* Editorial copy wants a slightly open measure and generous leading. */
+  font-feature-settings: "kern", "liga";
 }
 
 ::selection {
-  background-color: #e6bd60;
-  color: #051740;
+  background-color: rgb(var(--accent));
+  color: rgb(var(--accent-fg));
 }
 
-/* Subtle repeating 8-point Islamic star lattice. On the white theme it sits at
-   a much lower opacity than it did on navy, so it reads as paper texture
-   rather than a visible grid. */
-.pattern-lattice {
-  background-image: radial-gradient(
-      circle at 1px 1px,
-      rgba(212, 162, 47, 0.28) 1px,
-      transparent 0
-    ),
-    linear-gradient(135deg, rgba(5, 23, 64, 0.04) 1px, transparent 1px),
-    linear-gradient(45deg, rgba(5, 23, 64, 0.04) 1px, transparent 1px);
-  background-size: 28px 28px, 28px 28px, 28px 28px;
+/* ── Editorial primitives ──────────────────────────────────────────────── */
+
+/* The single accent hairline used to open a section. Short, thin, quiet. */
+.rule-accent {
+  height: 1px;
+  width: 44px;
+  background: linear-gradient(
+    90deg,
+    rgb(var(--accent)),
+    rgb(var(--accent) / 0)
+  );
 }
 
-/* Headings pick up the logo's gold gradient. Weighted toward the deep end so
-   the text stays legible against white. */
-.text-gold-gradient {
-  background: linear-gradient(180deg, #e6bd60 0%, #d4a22f 55%, #8a6413 100%);
+/* Glowing display type — the portfolio's .gradient-text, rebuilt palette-aware.
+   Recipe from its CSS: a 135° gradient across the two accent stops, clipped to
+   the glyphs, with text-shadow: 0 0 60px <accent @ 50%> painted behind. The
+   shadow still renders even though the fill is transparent, because a text
+   shadow is drawn from the glyph geometry, not from its paint — that is what
+   produces the halo rather than a blurred copy of the letters. */
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.text-accent-gradient {
+  background-image: linear-gradient(
+    135deg,
+    rgb(var(--accent)) 0%,
+    rgb(var(--accent-2)) 100%
+  );
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: transparent;
+  text-shadow: 0 0 60px rgb(var(--accent) / 0.5);
+  animation: gradient-shift 3s ease infinite;
 }
 
-/* Respect reduced-motion users */
+/* A quieter halo for smaller text — the wordmark, section eyebrows. */
+.text-glow {
+  color: rgb(var(--accent));
+  text-shadow: 0 0 24px rgb(var(--accent) / 0.45);
+}
+
+/* Neon on white paper is unreadable, so the light theme drops the gradient,
+   the halo and the animation, keeping only the AA-safe flat accent. */
+[data-theme="light"] .text-accent-gradient {
+  background-image: none;
+  -webkit-text-fill-color: rgb(var(--accent));
+  color: rgb(var(--accent));
+  text-shadow: none;
+  animation: none;
+}
+
+[data-theme="light"] .text-glow {
+  text-shadow: none;
+}
+
+/* --shadow-glow: the cyan halo under the primary button. */
+.glow-button {
+  box-shadow: 0 0 40px rgb(var(--accent) / 0.3);
+}
+
+[data-theme="light"] .glow-button {
+  box-shadow: none;
+}
+
+/* Small-caps eyebrow above a heading — the main place the accent is allowed. */
+.eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgb(var(--accent));
+}
+
+/* The graph-paper grid from the portfolio (--grid-color: accent at 5%).
+   Palette-aware, so it re-tints itself with whichever theme is active and
+   disappears politely on the light one. */
+.grid-bg {
+  background-image: linear-gradient(rgb(var(--accent) / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--accent) / 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: center center;
+}
+
+[data-theme="light"] .grid-bg {
+  background-image: linear-gradient(rgb(var(--accent) / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--accent) / 0.07) 1px, transparent 1px);
+}
+
+/* Fades the grid out toward the edges so it reads as texture, not a table. */
+.grid-fade {
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 40%, transparent 100%);
+}
+
+/* --hero-glow / --shadow-glow equivalents. */
+.glow-accent {
+  box-shadow: 0 0 80px -20px rgb(var(--accent) / 0.35);
+}
+
+/* A barely-there vignette so full-bleed sections have depth without a border. */
+.vignette {
+  background: radial-gradient(
+    120% 80% at 50% 0%,
+    rgb(var(--accent) / 0.06),
+    transparent 60%
+  );
+}
+
+/* ── Scroll reveal ─────────────────────────────────────────────────────────
+   Two guards, both deliberate:
+
+   1. The hidden state lives behind `.js`, which the pre-paint script adds. If
+      JavaScript fails, is blocked, or the observer never fires, elements are
+      simply visible — content is never left stranded at opacity 0.
+   2. It is wrapped in prefers-reduced-motion: no-preference, so people who
+      have asked for less motion get the page fully rendered with no movement
+      at all, rather than a faster version of the same animation. */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+
+  .js [data-reveal="fade"] {
+    transform: none;
+  }
+
+  .js [data-reveal="left"] {
+    transform: translateX(-26px);
+  }
+
+  .js [data-reveal="right"] {
+    transform: translateX(26px);
+  }
+
+  .js [data-reveal="scale"] {
+    transform: scale(0.965);
+  }
+
+  .js [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+  }
+}
+
+/* ── Micro-interactions ────────────────────────────────────────────────── */
+
+/* Panels rise very slightly toward the pointer. 3px, not 8 — enough to feel
+   responsive, not enough to look like it is jumping. */
+@media (prefers-reduced-motion: no-preference) {
+  .lift-hover {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .lift-hover:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* Underline that grows from the leading edge on hover. */
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: -4px;
+  height: 1px;
+  width: 0;
+  background: rgb(var(--accent));
+  transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.link-underline:hover::after,
+.link-underline:focus-visible::after {
+  width: 100%;
+}
+
+/* FAQ answers slide open instead of appearing. grid-template-rows animates
+   from 0fr to 1fr, which is the only way to transition to an unknown height
+   without measuring it in JS. */
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.4s ease;
+  opacity: 0;
+}
+
+.collapse > * {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.collapse[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+/* ── Motion ────────────────────────────────────────────────────────────── */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  animation: fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  /* Belt and braces: even if a [data-reveal] slips past the guard above, it
+     must still end up visible. */
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
   *,
   *::before,
   *::after {

@@ -1,46 +1,65 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-const TOKEN_KEY = "rohani_illaj_admin_token";
+import {
+  clearUserToken,
+  getUserToken,
+  setUserToken,
+  type User,
+} from "./auth";
 
-export function getToken() {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
-export function setToken(token: string) {
-  localStorage.setItem(TOKEN_KEY, token);
-}
+/*
+ * There is one session, not two. An admin is just a user whose role is
+ * "admin", so the admin panel reads the same token the rest of the site uses
+ * — no second credential to get out of sync, and signing out signs you out
+ * everywhere.
+ */
+export const getToken = getUserToken;
+export const setToken = setUserToken;
+export const clearToken = clearUserToken;
 
-export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY);
-}
-
-export async function adminLogin(username: string, password: string) {
+export async function adminLogin(phone: string, password: string) {
   const res = await fetch(`${API_URL}/admin/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ phone, password }),
   });
   const data = await res.json();
+  // 403 here means the credentials were right but the account isn't an admin.
   if (!res.ok) throw new Error(data.error || "Login nahi ho saka.");
   setToken(data.token);
-  return data.token as string;
+  return data.user as User;
 }
 
 export type Booking = {
   _id: string;
+  /** Present when the customer had an account at booking time, or created
+   *  one later with the same phone number. */
+  user?: string;
   serviceType: "call" | "physical";
   amount: number;
   customerName: string;
   customerPhone: string;
+  slotTime?: string;
+  slotEndTime?: string;
+  /** Short quotable code from the Calendly event, e.g. "4F2A9C31". */
+  slotReference?: string;
+  calendlyEventName?: string;
+  paidByThirdParty?: boolean;
   paymentMethod: string;
-  accountTitle: string;
-  transactionId: string;
+  /** Only present on bookings taken before the form was simplified. */
+  accountTitle?: string;
+  transactionId?: string;
   screenshotUrl: string;
   status: "pending" | "approved" | "rejected";
   meetLink?: string;
   adminNote?: string;
   createdAt: string;
 };
+
+/** Attached by the API to an approve/reject response: did the customer
+ *  actually get told? A silent failure here means someone who paid believes
+ *  they were ignored. */
+export type NotifyResult = { sent: boolean; reason?: string };
 
 export type Stats = {
   pending: number;
@@ -60,20 +79,34 @@ export async function fetchStats() {
   return data as Stats;
 }
 
-export async function fetchBookings(status?: string, q?: string) {
+export type BookingPage = {
+  items: Booking[];
+  total: number;
+  skip: number;
+  limit: number;
+};
+
+export async function fetchBookings(
+  status?: string,
+  q?: string,
+  opts?: { skip?: number; limit?: number }
+) {
   const url = new URL(`${API_URL}/admin/bookings`);
   if (status) url.searchParams.set("status", status);
   if (q) url.searchParams.set("q", q);
+  url.searchParams.set("skip", String(opts?.skip ?? 0));
+  url.searchParams.set("limit", String(opts?.limit ?? 25));
 
   const res = await fetch(url.toString(), { headers: authHeaders() });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Bookings load nahi hui.");
-  return data as Booking[];
+  return data as BookingPage;
 }
 
 export async function updateBookingStatus(
   id: string,
-  status: "approved" | "rejected",
+  // "pending" reopens a booking whose decision was a mis-click.
+  status: "approved" | "rejected" | "pending",
   extra?: { meetLink?: string; adminNote?: string }
 ) {
   const res = await fetch(`${API_URL}/admin/bookings/${id}`, {
@@ -83,5 +116,5 @@ export async function updateBookingStatus(
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Update nahi ho saka.");
-  return data as Booking;
+  return data as Booking & { notified?: NotifyResult };
 }

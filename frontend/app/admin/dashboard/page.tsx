@@ -1,292 +1,518 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
+import { useAuth } from "@/components/AuthProvider";
+import PalettePicker from "@/components/PalettePicker";
+import StatusBadge from "@/components/StatusBadge";
+import { Button, Alert } from "@/components/ui";
+import { formatDateTime, formatSlotRange } from "@/lib/datetime";
 import {
   Booking,
   Stats,
+  clearToken,
   fetchBookings,
   fetchStats,
   getToken,
-  clearToken,
   updateBookingStatus,
 } from "@/lib/adminApi";
 
+const PAGE_SIZE = 25;
+
 const TABS = [
-  { key: "pending", label: "زیرِ التواء" },
-  { key: "approved", label: "منظور شدہ" },
-  { key: "rejected", label: "مسترد شدہ" },
-];
+  { value: "pending", label: "Pending" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
+  { value: "", label: "All" },
+] as const;
+
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [tab, setTab] = useState("pending");
-  const [search, setSearch] = useState("");
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const { user, loading: authLoading, signOut } = useAuth();
+  const [tab, setTab] = useState<string>("pending");
+  const [query, setQuery] = useState("");
+  const [bookings, setBookings] = useState<Booking[] | null>(null);
+  const [total, setTotal] = useState(0);
   const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [loadingMore, setLoadingMore] = useState(false);
 
+  /** Reloads from the top. Also used after an approve/reject so the row moves
+   *  into the right tab immediately. */
   const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
     try {
-      const [list, s] = await Promise.all([
-        fetchBookings(tab, search || undefined),
+      const [page, s] = await Promise.all([
+        fetchBookings(tab, query, { skip: 0, limit: PAGE_SIZE }),
         fetchStats(),
       ]);
-      setBookings(list);
+      setBookings(page.items);
+      setTotal(page.total);
       setStats(s);
+      setError("");
     } catch (err: any) {
-      if (String(err.message).toLowerCase().includes("login")) {
-        router.push("/admin/login");
-        return;
-      }
+      setError(err.message);
+    }
+  }, [tab, query]);
+
+  const loadMore = useCallback(async () => {
+    if (!bookings) return;
+    setLoadingMore(true);
+    try {
+      const page = await fetchBookings(tab, query, {
+        skip: bookings.length,
+        limit: PAGE_SIZE,
+      });
+      setBookings((prev) => [...(prev ?? []), ...page.items]);
+      setTotal(page.total);
+    } catch (err: any) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setLoadingMore(false);
     }
-  }, [tab, search, router]);
+  }, [bookings, tab, query]);
 
+  // One effect owns fetching. Previously a mount effect and a debounce effect
+  // both called load(), firing two requests per tab change — and the debounced
+  // one still fired after the no-token redirect.
   useEffect(() => {
-    if (!getToken()) {
-      router.push("/admin/login");
+    if (authLoading) return;
+    // A token alone is no longer enough — a signed-in customer must not reach
+    // the panel just because they have a valid session.
+    if (!getToken() || user?.role !== "admin") {
+      router.replace("/admin/login");
       return;
     }
-    load();
-  }, [load, router]);
-
-  async function handleDecision(
-    id: string,
-    status: "approved" | "rejected",
-    meetLink?: string
-  ) {
-    setBusyId(id);
-    try {
-      await updateBookingStatus(id, status, { meetLink });
-      await load();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setBusyId(null);
-    }
-  }
+    const t = setTimeout(load, query ? 300 : 0);
+    return () => clearTimeout(t);
+  }, [load, query, router, user, authLoading]);
 
   return (
-    <main className="min-h-screen bg-navy-soft px-4 py-10 sm:px-6">
+    <main className="min-h-screen px-6 py-10">
       <div className="mx-auto max-w-5xl">
-        <div className="flex items-center justify-between">
-          <h1 className="font-display text-2xl text-navy">Bookings</h1>
-          <button
-            onClick={() => {
-              clearToken();
-              router.push("/admin/login");
-            }}
-            className="rounded-full border border-navy/25 bg-white px-4 py-1.5 font-body text-xs text-navy/70 transition hover:border-navy hover:text-navy"
-          >
-            Logout
-          </button>
-        </div>
+        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-8">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/asset/logo-mark.png"
+              alt=""
+              width={421}
+              height={541}
+              className="h-9 w-auto"
+            />
+            <div>
+              <p className="eyebrow font-body">
+                Administration{user ? ` · ${user.name}` : ""}
+              </p>
+              <h1 className="mt-1.5 font-display text-2xl font-light text-fg">
+                Bookings
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <PalettePicker />
+            <ThemeToggle />
+            <button
+              type="button"
+              onClick={() => {
+                signOut();
+                clearToken();
+                router.push("/admin/login");
+              }}
+              className="rounded-full border border-line px-4 py-2 font-body text-xs text-muted transition-colors hover:border-accent/60 hover:text-accent"
+            >
+              Sign out
+            </button>
+          </div>
+        </header>
 
         {stats && (
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatCard label="زیرِ التواء" value={String(stats.pending)} highlight />
-            <StatCard label="منظور شدہ" value={String(stats.approved)} />
-            <StatCard label="مسترد شدہ" value={String(stats.rejected)} />
-            <StatCard
-              label="کل وصولی"
+          <div className="mt-10 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-4">
+            <Stat label="Pending" value={stats.pending} highlight />
+            <Stat label="Approved" value={stats.approved} />
+            <Stat label="Rejected" value={stats.rejected} />
+            <Stat
+              label="Approved revenue"
               value={`Rs ${stats.approvedRevenue.toLocaleString()}`}
             />
           </div>
         )}
 
-        <div className="mt-6 flex flex-wrap items-center gap-2">
+        <div className="mt-10 flex flex-wrap items-center gap-3">
           {TABS.map((t) => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`rounded-full border px-4 py-1.5 font-body text-sm transition ${
-                tab === t.key
-                  ? "border-navy bg-navy text-white"
-                  : "border-gold bg-white text-navy/70 hover:bg-gold-soft"
+              key={t.label}
+              onClick={() => setTab(t.value)}
+              aria-pressed={tab === t.value}
+              className={`rounded-full border px-4 py-2 font-body text-xs tracking-wide transition-all duration-500 ease-editorial ${
+                tab === t.value
+                  ? "border-accent text-accent"
+                  : "border-line text-muted hover:text-fg"
               }`}
             >
               {t.label}
             </button>
           ))}
+
           <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="نام، نمبر یا TID تلاش کریں"
-            className="ms-auto w-full rounded-full border border-gold bg-white px-4 py-1.5 font-body text-sm text-navy placeholder-navy/35 outline-none focus:border-gold-deep sm:w-64"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search name, phone, or slot ref…"
+            aria-label="Search bookings"
+            className="ms-auto w-full border-b border-line bg-transparent py-2 font-body text-sm text-fg placeholder:text-muted/50 outline-none transition-colors focus:border-accent sm:w-72"
           />
         </div>
 
         {error && (
-          <p role="alert" className="mt-4 font-body text-sm text-red-700">
-            {error}
-          </p>
+          <div className="mt-8">
+            <Alert>{error}</Alert>
+          </div>
         )}
 
-        <div className="mt-8 space-y-4">
-          {loading && <p className="font-body text-navy/60">Loading...</p>}
-          {!loading && bookings.length === 0 && (
-            <p className="rounded-2xl border border-gold bg-white p-8 text-center font-body text-navy/60">
-              اس فہرست میں کوئی بکنگ نہیں ہے۔
-            </p>
-          )}
+        {bookings === null && !error && (
+          <p className="mt-10 font-body text-sm text-muted">Loading…</p>
+        )}
 
-          {bookings.map((b) => (
-            <BookingRow
-              key={b._id}
-              booking={b}
-              busy={busyId === b._id}
-              onDecide={handleDecision}
-            />
-          ))}
-        </div>
+        {bookings?.length === 0 && (
+          <div className="mt-10 rounded-lg border border-line bg-surface p-14 text-center font-body text-sm text-muted">
+            No bookings in this view.
+          </div>
+        )}
+
+        {bookings && bookings.length > 0 && (
+          <>
+            <p className="mt-10 font-body text-xs text-muted">
+              Showing {bookings.length} of {total}
+            </p>
+
+            <ul className="mt-4 space-y-px overflow-hidden rounded-lg border border-line bg-line">
+              {bookings.map((b) => (
+                <BookingRow key={b._id} booking={b} onChanged={load} />
+              ))}
+            </ul>
+
+            {bookings.length < total && (
+              <div className="mt-8 text-center">
+                <Button
+                  variant="outline"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="px-8 py-2.5 text-xs"
+                >
+                  {loadingMore ? "Loading…" : `Load ${Math.min(PAGE_SIZE, total - bookings.length)} more`}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </main>
   );
 }
 
-function StatCard({
+function Stat({
   label,
   value,
   highlight,
 }: {
   label: string;
-  value: string;
+  value: string | number;
   highlight?: boolean;
 }) {
   return (
-    <div
-      className={`rounded-xl border p-4 ${
-        highlight ? "border-gold-deep bg-gold-soft" : "border-gold bg-white"
-      }`}
-    >
-      <p className="font-body text-xs text-navy/55">{label}</p>
-      <p className="mt-1 font-body text-xl font-semibold text-navy">{value}</p>
+    <div className="bg-surface p-6">
+      <p className="font-body text-[11px] tracking-[0.18em] text-muted">
+        {label.toUpperCase()}
+      </p>
+      <p
+        className={`mt-3 font-display text-3xl font-light ${
+          highlight ? "text-accent" : "text-fg"
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
 }
 
 function BookingRow({
   booking: b,
-  busy,
-  onDecide,
+  onChanged,
 }: {
   booking: Booking;
-  busy: boolean;
-  onDecide: (id: string, status: "approved" | "rejected", meetLink?: string) => void;
+  onChanged: () => void;
 }) {
-  const [showApprove, setShowApprove] = useState(false);
-  const [meetLink, setMeetLink] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [meetLink, setMeetLink] = useState(b.meetLink || "");
+  const [note, setNote] = useState("");
+  const [rowError, setRowError] = useState("");
+  const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
+  // Rejecting asks for a reason first rather than firing on the first click —
+  // the customer has already paid, so a bare "rejected" guarantees a phone call.
+  const [confirmingReject, setConfirmingReject] = useState(false);
 
-  const waNumber = b.customerPhone.replace(/\D/g, "").replace(/^0/, "92");
+  async function act(status: "approved" | "rejected" | "pending") {
+    if (status === "rejected" && note.trim().length < 5) {
+      setConfirmingReject(true);
+      setRowError("Add a short reason before rejecting.");
+      return;
+    }
+
+    setBusy(true);
+    setRowError("");
+    setNotice(null);
+    try {
+      const updated = await updateBookingStatus(b._id, status, {
+        meetLink: meetLink || undefined,
+        adminNote: note || undefined,
+      });
+      setConfirmingReject(false);
+
+      // Surface whether the customer was actually emailed. Approving without
+      // telling them is worse than not approving yet — they have paid and are
+      // waiting, and a failure here is otherwise invisible.
+      const n = updated.notified;
+      if (status !== "pending" && n) {
+        setNotice(
+          n.sent
+            ? { ok: true, text: "Customer notified by email." }
+            : {
+                ok: false,
+                text:
+                  n.reason === "no-email"
+                    ? "Saved, but this booking has no email address — contact them on WhatsApp."
+                    : `Saved, but the email did NOT send (${n.reason}). Contact them on WhatsApp.`,
+              }
+        );
+      }
+      onChanged();
+    } catch (err: any) {
+      setRowError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <div className="rounded-2xl border border-gold bg-white p-5 shadow-card">
+    <li className="bg-surface p-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="font-body text-sm text-navy/85">
-          <p className="text-base font-semibold text-navy">
-            {b.customerName} — {b.serviceType === "call" ? "Call" : "Physical"} (Rs{" "}
-            {b.amount.toLocaleString()})
+        <div>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-lg font-light text-fg">{b.customerName}</h2>
+            <StatusBadge status={b.status} force="en" />
+            {b.user && (
+              <span className="rounded-full border border-line px-2.5 py-0.5 font-body text-[10px] tracking-wide text-muted">
+                Registered
+              </span>
+            )}
+            {b.paidByThirdParty && (
+              <span className="rounded-full border border-accent/50 px-2.5 py-0.5 font-body text-[10px] tracking-wide text-accent">
+                Third-party payment
+              </span>
+            )}
+          </div>
+          <p className="mt-2 font-body text-sm text-muted">
+            {b.serviceType === "call" ? "Initial call" : "Physical session"} · Rs{" "}
+            {b.amount.toLocaleString()}
           </p>
-          <p className="mt-1">
-            Phone:{" "}
-            <a
-              href={`https://wa.me/${waNumber}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-gold-dark underline"
-            >
-              {b.customerPhone}
-            </a>
-          </p>
-          <p>
-            {b.paymentMethod} · Account title: {b.accountTitle} · TID:{" "}
-            <span className="font-semibold text-navy">{b.transactionId}</span>
-          </p>
+        </div>
+
+        <a
+          href={`https://wa.me/${b.customerPhone.replace(/\D/g, "").replace(/^0/, "92")}`}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="border-b border-line pb-0.5 font-body text-sm text-fg transition-colors hover:border-accent hover:text-accent"
+        >
+          {b.customerPhone}
+        </a>
+      </div>
+
+      <div className="mt-6 grid gap-6 border-t border-line pt-6 sm:grid-cols-[180px_1fr]">
+        {/* The receipt is the only proof of payment now, so it leads the row
+            rather than hiding behind a link the ustad has to think to click. */}
+        {b.screenshotUrl && (
           <a
             href={b.screenshotUrl}
             target="_blank"
-            rel="noreferrer"
-            className="mt-1 inline-block text-gold-dark underline"
+            rel="noreferrer noopener"
+            className="group relative block overflow-hidden rounded-md border border-line transition-colors hover:border-accent"
+            title="Open full size"
           >
-            Screenshot dekhein
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={b.screenshotUrl}
+              alt={`Payment receipt from ${b.customerName}`}
+              loading="lazy"
+              className="h-36 w-full bg-surface-2 object-cover object-top"
+            />
+            <span className="absolute inset-x-0 bottom-0 bg-ink/80 py-1.5 text-center font-body text-[10px] tracking-wide text-fg opacity-0 transition-opacity group-hover:opacity-100">
+              Open full size ↗
+            </span>
           </a>
-          <p className="mt-1 text-xs text-navy/45">
-            {new Date(b.createdAt).toLocaleString()}
-          </p>
-          {b.meetLink && (
-            <p className="mt-1 text-xs text-navy/60">Meet: {b.meetLink}</p>
-          )}
-        </div>
-
-        {b.status === "pending" ? (
-          <div className="flex items-start gap-2">
-            <button
-              disabled={busy}
-              onClick={() => setShowApprove((v) => !v)}
-              className="rounded-full bg-navy px-4 py-1.5 font-body text-xs text-white transition hover:bg-navy-light disabled:opacity-50"
-            >
-              Approve
-            </button>
-            <button
-              disabled={busy}
-              onClick={() => onDecide(b._id, "rejected")}
-              className="rounded-full border border-red-300 bg-red-50 px-4 py-1.5 font-body text-xs text-red-700 transition hover:bg-red-100 disabled:opacity-50"
-            >
-              Reject
-            </button>
-          </div>
-        ) : (
-          <span
-            className={`h-fit rounded-full px-3 py-1 font-body text-xs ${
-              b.status === "approved"
-                ? "border border-gold-deep bg-gold-soft text-gold-dark"
-                : "border border-red-300 bg-red-50 text-red-700"
-            }`}
-          >
-            {b.status}
-          </span>
         )}
+
+        <dl className="grid gap-5 font-body text-xs sm:grid-cols-2">
+          <div>
+            <dt className="text-muted/70">Slot</dt>
+            <dd className="mt-1.5 text-fg">
+              {formatSlotRange(b.slotTime, b.slotEndTime)}
+            </dd>
+            {b.calendlyEventName && (
+              <dd className="mt-1 text-muted/70">{b.calendlyEventName}</dd>
+            )}
+            {!b.slotTime && (
+              <dd className="mt-1 text-muted/70">
+                Not resolved — set the Calendly token
+              </dd>
+            )}
+          </div>
+          <div>
+            <dt className="text-muted/70">Slot reference</dt>
+            <dd className="mt-1.5 font-medium tracking-wider text-accent">
+              {b.slotReference || "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted/70">Submitted</dt>
+            <dd className="mt-1.5 text-fg">{formatDateTime(b.createdAt)}</dd>
+          </div>
+          {/* Present when the customer said the money came from another
+              person's account, or on legacy bookings from the older form. */}
+          {b.accountTitle && (
+            <div>
+              <dt className="text-muted/70">
+                {b.paidByThirdParty ? "Paid by (third party)" : "Paid from"}
+              </dt>
+              <dd className="mt-1.5 break-words text-fg">{b.accountTitle}</dd>
+            </div>
+          )}
+          {b.transactionId && (
+            <div>
+              <dt className="text-muted/70">Transaction ID</dt>
+              <dd className="mt-1.5 break-all text-accent">{b.transactionId}</dd>
+            </div>
+          )}
+        </dl>
       </div>
 
-      {showApprove && b.status === "pending" && (
-        <div className="mt-4 rounded-xl border border-gold bg-gold-soft p-4">
-          <label className="mb-2 block font-body text-xs text-navy/70">
-            Google Meet link (optional — Calendly usually emails this itself)
-          </label>
-          <div className="flex flex-wrap gap-2">
+      {b.status === "pending" ? (
+        <div className="mt-7 rounded-md border border-line bg-surface-2 p-5">
+          <p className="font-body text-[11px] tracking-[0.18em] text-muted">
+            VERIFY &amp; RESPOND
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <input
               value={meetLink}
               onChange={(e) => setMeetLink(e.target.value)}
-              placeholder="https://meet.google.com/..."
-              className="min-w-0 flex-1 rounded-lg border border-gold bg-white px-3 py-2 font-body text-sm text-navy placeholder-navy/30 outline-none focus:border-gold-deep"
+              placeholder="Google Meet link (optional)"
+              aria-label="Google Meet link"
+              className="w-full border-b border-line bg-transparent py-2 font-body text-sm text-fg placeholder:text-muted/50 outline-none focus:border-accent"
             />
-            <button
-              disabled={busy}
-              onClick={() => onDecide(b._id, "approved", meetLink || undefined)}
-              className="rounded-full bg-navy px-5 py-2 font-body text-xs text-white transition hover:bg-navy-light disabled:opacity-50"
-            >
-              {busy ? "..." : "Confirm approve"}
-            </button>
+            <input
+              value={note}
+              onChange={(e) => {
+                setNote(e.target.value);
+                if (rowError) setRowError("");
+              }}
+              placeholder={
+                confirmingReject
+                  ? "Reason for rejection (required)"
+                  : "Note to customer (optional)"
+              }
+              aria-label="Note to customer"
+              aria-invalid={confirmingReject && note.trim().length < 5}
+              className={`w-full border-b bg-transparent py-2 font-body text-sm text-fg placeholder:text-muted/50 outline-none focus:border-accent ${
+                confirmingReject && note.trim().length < 5
+                  ? "border-danger"
+                  : "border-line"
+              }`}
+            />
           </div>
-          <a
-            href={`https://wa.me/${waNumber}?text=${encodeURIComponent(
-              `السلام علیکم ${b.customerName}، آپ کی بکنگ کی تصدیق ہو گئی ہے۔`
-            )}`}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-3 inline-block font-body text-xs text-gold-dark underline"
+
+          {rowError && (
+            <p className="mt-4 font-body text-xs text-danger">{rowError}</p>
+          )}
+
+          {notice && (
+            <p
+              className={`mt-4 rounded-md border px-3 py-2 font-body text-xs leading-6 ${
+                notice.ok
+                  ? "border-accent/40 text-accent"
+                  : "border-danger/50 text-danger"
+              }`}
+            >
+              {notice.text}
+            </p>
+          )}
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button
+              onClick={() => act("approved")}
+              disabled={busy}
+              className="px-6 py-2 text-xs"
+            >
+              {busy ? "…" : "Approve payment"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => act("rejected")}
+              disabled={busy}
+              className="px-6 py-2 text-xs hover:border-danger/60 hover:text-danger"
+            >
+              {confirmingReject ? "Confirm rejection" : "Reject"}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-6 border-t border-line pt-5">
+          {b.meetLink && (
+            <p className="font-body text-xs text-muted">
+              Meet link:{" "}
+              <a
+                href={b.meetLink}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-accent hover:underline"
+              >
+                {b.meetLink}
+              </a>
+            </p>
+          )}
+          {b.adminNote && (
+            <p className="mt-2 font-body text-xs leading-6 text-muted">
+              Reason / note: {b.adminNote}
+            </p>
+          )}
+
+          {rowError && (
+            <p className="mt-3 font-body text-xs text-danger">{rowError}</p>
+          )}
+
+          {notice && (
+            <p
+              className={`mt-3 rounded-md border px-3 py-2 font-body text-xs leading-6 ${
+                notice.ok
+                  ? "border-accent/40 text-accent"
+                  : "border-danger/50 text-danger"
+              }`}
+            >
+              {notice.text}
+            </p>
+          )}
+
+          {/* One wrong tap used to be permanent. */}
+          <button
+            type="button"
+            onClick={() => act("pending")}
+            disabled={busy}
+            className="mt-4 border-b border-line pb-0.5 font-body text-xs text-muted transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
           >
-            WhatsApp par confirmation bhejein →
-          </a>
+            {busy ? "…" : "↩ Undo — move back to pending"}
+          </button>
         </div>
       )}
-    </div>
+    </li>
   );
 }

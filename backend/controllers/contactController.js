@@ -9,6 +9,12 @@ const TOPICS = {
   deegar: "Deegar",
 };
 
+/** The site publishes no phone number until a payment is approved, so the
+ *  only honest fallback when the form itself is down is the public email. */
+function fallbackContact() {
+  return process.env.PUBLIC_CONTACT_EMAIL || process.env.CONTACT_TO_EMAIL || "";
+}
+
 // POST /api/contact   body: { name, phone, email?, topic, message, website? }
 async function submitContact(req, res) {
   const { name, phone, email, topic, message, website } = req.body || {};
@@ -42,9 +48,15 @@ async function submitContact(req, res) {
     console.error(
       "Contact form submitted but SMTP is not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS and CONTACT_TO_EMAIL in backend/.env"
     );
+    const to = fallbackContact();
+    // A `code` travels with the message so the bilingual frontend can render
+    // this in the reader's own language instead of always in Roman Urdu.
     return res.status(503).json({
-      error:
-        "Form abhi kaam nahi kar raha. Baraye meharbani WhatsApp par rabta karein.",
+      code: "SMTP_NOT_CONFIGURED",
+      contactEmail: to,
+      error: to
+        ? `Form abhi kaam nahi kar raha. Baraye meharbani hamein seedha email karein: ${to}`
+        : "Form abhi kaam nahi kar raha. Baraye meharbani thori dair baad dobara koshish karein.",
     });
   }
 
@@ -59,9 +71,13 @@ async function submitContact(req, res) {
     return res.status(200).json({ message: "Paigham bhej diya gaya hai." });
   } catch (err) {
     console.error("Contact email failed:", err.message);
+    const to = fallbackContact();
     return res.status(502).json({
-      error:
-        "Paigham bhejne mein masla hua. Baraye meharbani WhatsApp par rabta karein.",
+      code: "SEND_FAILED",
+      contactEmail: to,
+      error: to
+        ? `Paigham bhejne mein masla hua. Baraye meharbani hamein seedha email karein: ${to}`
+        : "Paigham bhejne mein masla hua. Baraye meharbani thori dair baad dobara koshish karein.",
     });
   }
 }

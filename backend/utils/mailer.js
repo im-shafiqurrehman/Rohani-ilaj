@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const { formatSlotRange } = require("./datetime");
 
 /*
  * Outbound mail for the public contact form.
@@ -101,4 +102,220 @@ function escapeHtml(s) {
     .replace(/"/g, "&quot;");
 }
 
-module.exports = { sendContactEmail, isConfigured };
+/**
+ * Tells a customer their payment was approved or rejected.
+ *
+ * Email because it is the only channel that costs nothing: SMTP is already
+ * configured for the contact form. WhatsApp and SMS both require a paid
+ * provider (see the notes in README/env).
+ *
+ * Never throws — a mail failure must not roll back an approval the ustad has
+ * already made. Returns a reason instead so the caller can surface it.
+ */
+async function sendBookingDecisionEmail(booking, { contactNumber } = {}) {
+  if (!booking.customerEmail) return { sent: false, reason: "no-email" };
+
+  const tx = getTransporter();
+  if (!tx) return { sent: false, reason: "smtp-not-configured" };
+
+  const approved = booking.status === "approved";
+  const slot = formatSlotRange(booking.slotTime, booking.slotEndTime);
+
+  const rows = [
+    ["Service", booking.serviceType === "call" ? "Initial call" : "Physical session"],
+    ["Amount", `Rs ${Number(booking.amount || 0).toLocaleString()}`],
+    slot ? ["Your slot", slot] : null,
+    booking.slotReference ? ["Slot reference", booking.slotReference] : null,
+    approved && contactNumber ? ["Contact number", contactNumber] : null,
+    // Deliberately no meeting link: Calendly already emails its own
+    // confirmation containing it when the slot is booked. Repeating it here
+    // gives the customer two links to choose between, and one of them can go
+    // stale if the event is ever rescheduled.
+    booking.adminNote ? ["Note", booking.adminNote] : null,
+  ].filter(Boolean);
+
+  const heading = approved
+    ? "Aap ki booking confirm ho gayi hai"
+    : "Aap ki booking manzoor nahi ho saki";
+
+  const text =
+    `${heading}\n\n` +
+    rows.map(([k, v]) => `${k}: ${v}`).join("\n") +
+    `\n\nRohani Ilaj Center\n`;
+
+  const html = `
+    <div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#0B1B2B;max-width:560px">
+      <h2 style="margin:0 0 6px">${heading}</h2>
+      <p style="margin:0 0 18px;color:#4A6076;font-size:13px">Rohani Ilaj Center</p>
+      <table cellpadding="8" style="border-collapse:collapse;font-size:14px;width:100%">
+        ${rows
+          .map(
+            ([k, v]) =>
+              `<tr>
+                 <td style="border:1px solid #D3E1ED;background:#F6F9FC;font-weight:600;white-space:nowrap">${escapeHtml(k)}</td>
+                 <td style="border:1px solid #D3E1ED">${escapeHtml(String(v))}</td>
+               </tr>`
+          )
+          .join("")}
+      </table>
+      ${
+        approved
+          ? `<p style="margin:18px 0 0;font-size:14px;line-height:1.7">Muqarrara waqt par raabta karein. Shukriya.</p>`
+          : `<p style="margin:18px 0 0;font-size:14px;line-height:1.7">Agar aap ko lagta hai ke yeh ghalti se hua hai, to baraye meharbani hum se raabta karein.</p>`
+      }
+    </div>
+  `;
+
+  try {
+    await tx.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: booking.customerEmail,
+      subject: approved
+        ? "Booking confirmed — Rohani Ilaj Center"
+        : "Booking update — Rohani Ilaj Center",
+      text,
+      html,
+    });
+    return { sent: true };
+  } catch (err) {
+    console.error("Decision email failed:", err.message);
+    return { sent: false, reason: err.message };
+  }
+}
+
+/** Shared table + wrapper so every booking email looks the same. */
+function bookingHtml(heading, subheading, rows, footer) {
+  return `
+    <div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#0B1B2B;max-width:560px">
+      <h2 style="margin:0 0 6px">${escapeHtml(heading)}</h2>
+      <p style="margin:0 0 18px;color:#4A6076;font-size:13px">${escapeHtml(subheading)}</p>
+      <table cellpadding="8" style="border-collapse:collapse;font-size:14px;width:100%">
+        ${rows
+          .map(
+            ([k, v]) =>
+              `<tr>
+                 <td style="border:1px solid #D3E1ED;background:#F6F9FC;font-weight:600;white-space:nowrap">${escapeHtml(k)}</td>
+                 <td style="border:1px solid #D3E1ED">${escapeHtml(String(v))}</td>
+               </tr>`
+          )
+          .join("")}
+      </table>
+      ${footer ? `<p style="margin:18px 0 0;font-size:14px;line-height:1.7">${escapeHtml(footer)}</p>` : ""}
+    </div>`;
+}
+
+function bookingRows(booking) {
+  return [
+    ["Service", booking.serviceType === "call" ? "Initial call" : "Physical session"],
+    ["Amount", `Rs ${Number(booking.amount || 0).toLocaleString()}`],
+    booking.slotTime
+      ? ["Slot", formatSlotRange(booking.slotTime, booking.slotEndTime)]
+      : null,
+    booking.slotReference ? ["Slot reference", booking.slotReference] : null,
+  ].filter(Boolean);
+}
+
+/**
+ * NOT CURRENTLY SENT. Policy is one customer email only, at approval time.
+ * Retained because re-enabling it is a single call in bookingController.
+ *
+ * Acknowledges a booking the moment it is submitted, so the customer has
+ * written proof their receipt arrived — otherwise the only feedback is a
+ * screen they navigate away from, and the next step is a worried WhatsApp
+ * message asking whether it went through.
+ *
+ * The contact number is NOT included: the payment has not been approved yet.
+ */
+async function sendBookingReceivedEmail(booking) {
+  if (!booking.customerEmail) return { sent: false, reason: "no-email" };
+  const tx = getTransporter();
+  if (!tx) return { sent: false, reason: "smtp-not-configured" };
+
+  const rows = bookingRows(booking);
+  const footer =
+    "Aap ki receipt ki tasdeeq ki ja rahi hai. Tasdeeq ke baad aap ko raabta number aur nishist ki tafseelat bhej di jayengi.";
+
+  try {
+    await tx.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: booking.customerEmail,
+      subject: "Booking received — Rohani Ilaj Center",
+      text:
+        `Aap ki booking mil gayi hai\n\n` +
+        rows.map(([k, v]) => `${k}: ${v}`).join("\n") +
+        `\n\n${footer}\n`,
+      html: bookingHtml(
+        "Aap ki booking mil gayi hai",
+        "Rohani Ilaj Center",
+        rows,
+        footer
+      ),
+    });
+    return { sent: true };
+  } catch (err) {
+    console.error("Booking-received email failed:", err.message);
+    return { sent: false, reason: err.message };
+  }
+}
+
+/**
+ * Tells the practitioner a booking is waiting. Goes to CONTACT_TO_EMAIL, the
+ * same inbox the contact form uses.
+ */
+async function sendNewBookingAlert(booking) {
+  const tx = getTransporter();
+  if (!tx || !process.env.CONTACT_TO_EMAIL) {
+    return { sent: false, reason: "smtp-not-configured" };
+  }
+
+  const rows = [
+    ["Name", booking.customerName],
+    ["Phone", booking.customerPhone],
+    booking.customerEmail ? ["Email", booking.customerEmail] : null,
+    ...bookingRows(booking),
+    booking.paidByThirdParty ? ["Paid by (third party)", booking.accountTitle] : null,
+  ].filter(Boolean);
+
+  try {
+    await tx.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: process.env.CONTACT_TO_EMAIL,
+      replyTo: booking.customerEmail || undefined,
+      subject: `New booking — ${booking.customerName} (${booking.slotReference || "no ref"})`,
+      text: rows.map(([k, v]) => `${k}: ${v}`).join("\n"),
+      html: bookingHtml(
+        "New booking awaiting approval",
+        "Open the admin panel to review the receipt.",
+        rows,
+        ""
+      ),
+    });
+    return { sent: true };
+  } catch (err) {
+    console.error("New-booking alert failed:", err.message);
+    return { sent: false, reason: err.message };
+  }
+}
+
+/** Opens a real connection and authenticates, without sending anything.
+ *  Used by `npm run test:email` to separate "credentials wrong" from
+ *  "template broken". */
+async function verifyConnection() {
+  const tx = getTransporter();
+  if (!tx) return { ok: false, reason: "SMTP is not configured" };
+  try {
+    await tx.verify();
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, reason: err.message };
+  }
+}
+
+module.exports = {
+  verifyConnection,
+  sendContactEmail,
+  sendBookingDecisionEmail,
+  sendBookingReceivedEmail,
+  sendNewBookingAlert,
+  isConfigured,
+};
